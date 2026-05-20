@@ -1,34 +1,42 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { X, Plus } from "lucide-react";
-import type { Subject } from "@/lib/mock-data";
+import { X, Plus, Loader2 } from "lucide-react";
+
+type Subject = { id: number; name: string };
 
 type Props = {
   open: boolean;
   onClose: () => void;
   subjects: Subject[];
-  defaultSubjectId: string;
-  onGenerate: (subjectId: string) => void;
+  defaultSubjectId: number;
+  // Perubahan penting: Menerima teks!
+  onGenerate: (subjectId: number, text: string) => Promise<void>; 
 };
 
 export function GenerateModal({ open, onClose, subjects, defaultSubjectId, onGenerate }: Props) {
   const [text, setText] = useState("");
-  const [subjectId, setSubjectId] = useState(defaultSubjectId);
+  const [subjectId, setSubjectId] = useState<number>(defaultSubjectId);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (open) setSubjectId(defaultSubjectId);
+    if (open) {
+      setSubjectId(defaultSubjectId);
+      setText(""); // Reset form saat dibuka
+    }
   }, [open, defaultSubjectId]);
 
-  const submit = () => {
-    if (!text.trim() || loading) return;
+  const submit = async () => {
+    if (!text.trim() || loading || !subjectId) return;
     setLoading(true);
-    setTimeout(() => {
+    
+    try {
+      await onGenerate(subjectId, text); // Mengirim data asli ke Backend
+      onClose(); // Tutup modal hanya kalau sukses
+    } catch (e) {
+      // Error sudah di-handle di index.tsx
+    } finally {
       setLoading(false);
-      setText("");
-      onGenerate(subjectId);
-      onClose();
-    }, 1400);
+    }
   };
 
   return (
@@ -38,7 +46,7 @@ export function GenerateModal({ open, onClose, subjects, defaultSubjectId, onGen
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={!loading ? onClose : undefined} // Cegah tutup saat loading
           className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
         >
           <motion.div
@@ -57,15 +65,17 @@ export function GenerateModal({ open, onClose, subjects, defaultSubjectId, onGen
                 </span>
                 <h2 className="text-2xl font-bold mt-1">Materi baru → flashcards & kuis</h2>
               </div>
-              <button
-                onClick={onClose}
-                className="size-9 rounded-full glass flex items-center justify-center hover:bg-white/70"
-              >
-                <X className="size-4" />
-              </button>
+              {!loading && (
+                <button
+                  onClick={onClose}
+                  className="size-9 rounded-full glass flex items-center justify-center hover:bg-white/70"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
             </div>
 
-            <label className="text-sm font-medium block mb-2">Subjek</label>
+            <label className="text-sm font-medium block mb-2">Pilih Mata Kuliah</label>
             <div className="flex flex-wrap gap-2 mb-5">
               {subjects.map((s) => (
                 <button
@@ -73,34 +83,34 @@ export function GenerateModal({ open, onClose, subjects, defaultSubjectId, onGen
                   onClick={() => setSubjectId(s.id)}
                   className="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
                   style={{
-                    backgroundColor:
-                      subjectId === s.id ? "var(--color-blush)" : "var(--color-secondary)",
+                    backgroundColor: subjectId === s.id ? "var(--color-blush)" : "var(--color-secondary)",
                     color: subjectId === s.id ? "white" : "var(--color-foreground)",
                   }}
                 >
-                  <span className="mr-1">{s.emoji}</span>
                   {s.name}
                 </button>
               ))}
             </div>
 
-            <label className="text-sm font-medium block mb-2">Materi</label>
+            <label className="text-sm font-medium block mb-2">Catatan/Materi Kuliah</label>
             <div className="rounded-2xl glass-strong p-2">
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Paste catatan, bab, atau ringkasan kuliahmu di sini..."
+                placeholder="Paste catatan atau paragraf buku teksmu di sini..."
                 className="w-full min-h-[180px] resize-none rounded-xl bg-transparent p-4 text-base placeholder:text-muted-foreground/70 focus:outline-none"
               />
             </div>
 
             <div className="mt-5 flex items-center justify-end gap-2">
-              <button
-                onClick={onClose}
-                className="px-4 h-11 rounded-2xl font-medium text-muted-foreground hover:text-foreground transition"
-              >
-                Batal
-              </button>
+              {!loading && (
+                <button
+                  onClick={onClose}
+                  className="px-4 h-11 rounded-2xl font-medium text-muted-foreground hover:text-foreground transition"
+                >
+                  Batal
+                </button>
+              )}
               <motion.button
                 onClick={submit}
                 disabled={loading || !text.trim()}
@@ -111,12 +121,8 @@ export function GenerateModal({ open, onClose, subjects, defaultSubjectId, onGen
               >
                 {loading ? (
                   <>
-                    <motion.span
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                      className="size-4 border-2 border-white/40 border-t-white rounded-full"
-                    />
-                    Cooking...
+                    <Loader2 className="size-4 animate-spin" />
+                    Menyihir AI...
                   </>
                 ) : (
                   <>
@@ -132,13 +138,16 @@ export function GenerateModal({ open, onClose, subjects, defaultSubjectId, onGen
   );
 }
 
+// ==========================================
+// NewSubjectModal dibiarkan seperti bawaannya
+// ==========================================
 type NewSubjectProps = {
   open: boolean;
   onClose: () => void;
   onCreate: (name: string, emoji: string) => void;
 };
 
-const EMOJIS = ["📚", "🧪", "📐", "🎨", "💡", "⚙️", "🔬", "🌍", "🎯", "🚀"];
+const EMOJIS = ["📚", "🧪", "📐", "🎨", "💻", "🤖", "📈", "🌍", "🎯", "🚀"];
 
 export function NewSubjectModal({ open, onClose, onCreate }: NewSubjectProps) {
   const [name, setName] = useState("");
@@ -173,18 +182,18 @@ export function NewSubjectModal({ open, onClose, onCreate }: NewSubjectProps) {
             <h3 className="text-xl font-bold mb-1">Subjek baru</h3>
             <p className="text-sm text-muted-foreground mb-5">Tambahkan mata kuliah atau topik.</p>
 
-            <label className="text-sm font-medium block mb-2">Nama</label>
+            <label className="text-sm font-medium block mb-2">Nama Mata Kuliah</label>
             <input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="cth. Sistem Operasi"
+              placeholder="cth. Basis Data"
               className="w-full rounded-2xl border-0 px-4 h-12 mb-4 focus:outline-none focus:ring-2"
               style={{ backgroundColor: "var(--color-secondary)" }}
               onKeyDown={(e) => e.key === "Enter" && submit()}
             />
 
-            <label className="text-sm font-medium block mb-2">Emoji</label>
+            <label className="text-sm font-medium block mb-2">Ikon</label>
             <div className="flex flex-wrap gap-2 mb-6">
               {EMOJIS.map((e) => (
                 <button

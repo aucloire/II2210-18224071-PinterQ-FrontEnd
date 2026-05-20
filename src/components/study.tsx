@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ChevronLeft, ChevronRight, RotateCcw, Sparkles, Trophy } from "lucide-react";
+import { useEffect } from "react";
 
 export type Flashcard = { id: number; question: string; answer: string };
 
@@ -17,30 +18,102 @@ export type QuizQuestion = {
 export function FlashcardCarousel({ cards }: { cards: Flashcard[] }) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const card = cards[index];
+  const [hideMemorized, setHideMemorized] = useState(false);
+  
+  const [memorizedCards, setMemorizedCards] = useState<number[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("pinterq_memorized");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("pinterq_memorized", JSON.stringify(memorizedCards));
+  }, [memorizedCards]);
+
+  const displayCards = hideMemorized
+    ? cards.filter((c) => !memorizedCards.includes(c.id))
+    : cards;
+  
+  useEffect(() => {
+    if (index >= displayCards.length) setIndex(0);
+  }, [displayCards.length, index]);
+
+  const card = displayCards[index];
 
   const go = (dir: 1 | -1) => {
     setFlipped(false);
-    setIndex((i) => (i + dir + cards.length) % cards.length);
+    setIndex((i) => (i + dir + displayCards.length) % displayCards.length);
   };
 
+  const toggleMemorized = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (memorizedCards.includes(card.id)) {
+      setMemorizedCards(memorizedCards.filter(id => id !== card.id));
+    } else {
+      setMemorizedCards([...memorizedCards, card.id]);
+    }
+  };
+
+  if (displayCards.length === 0 && cards.length > 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div
+          className="size-16 rounded-full flex items-center justify-center mb-4 shadow-glow"
+          style={{ backgroundColor: "var(--color-sage)" }}
+        >
+          <Trophy className="size-8 text-white" />
+        </div>
+        <h3 className="text-2xl font-bold">Luar Biasa!</h3>
+        <p className="text-muted-foreground mt-2 mb-6 max-w-sm">
+          Kamu sudah menghafal semua kartu di materi ini. Siap untuk ujian!
+        </p>
+        <button
+          onClick={() => setHideMemorized(false)}
+          className="px-5 py-2.5 rounded-full text-sm font-semibold text-white shadow-soft transition hover:scale-105"
+          style={{ backgroundColor: "var(--color-blush)" }}
+        >
+          Ulangi Semua Kartu
+        </button>
+      </div>
+    );
+  }
+
   if (!card) return null;
+
+  const isMemorized = memorizedCards.includes(card.id);
 
   return (
     <div className="flex flex-col items-center w-full">
       <div className="flex items-center justify-between w-full max-w-xl mb-3 text-sm">
         <span className="font-medium text-muted-foreground">
-          {index + 1} / {cards.length}
+          {index + 1} / {displayCards.length}
         </span>
-        <button
-          onClick={() => {
-            setFlipped(false);
-            setIndex(0);
-          }}
-          className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full glass hover:bg-white/70 transition"
-        >
-          <RotateCcw className="size-3" /> Restart
-        </button>
+
+        <div className="flex items-center gap-4">
+          {/* Toggle Mode Fokus */}
+          <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+            <input
+              type="checkbox"
+              checked={hideMemorized}
+              onChange={(e) => setHideMemorized(e.target.checked)}
+              className="rounded size-4 border-gray-300"
+              style={{ accentColor: "var(--color-sage)" }}
+            />
+            Fokus Belum Hafal
+          </label>
+
+          <button
+            onClick={() => {
+              setFlipped(false);
+              setIndex(0);
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full glass hover:bg-white/70 transition"
+          >
+            <RotateCcw className="size-3" /> Restart
+          </button>
+        </div>
       </div>
 
       <div className="w-full max-w-xl perspective-1000 h-72 sm:h-80">
@@ -60,18 +133,45 @@ export function FlashcardCarousel({ cards }: { cards: Flashcard[] }) {
               transition={{ duration: 0.6, type: "spring", stiffness: 80, damping: 14 }}
             >
               {/* Front */}
-              <div className="absolute inset-0 backface-hidden rounded-3xl glass-strong p-8 shadow-soft flex flex-col justify-between">
-                <span
-                  className="text-xs font-semibold uppercase tracking-widest"
-                  style={{ color: "var(--color-oak)" }}
-                >
-                  Question · #{card.id.toString().padStart(2, "0")}
-                </span>
+              <div
+                className="absolute inset-0 backface-hidden rounded-3xl glass-strong p-8 shadow-soft flex flex-col justify-between"
+                style={{ border: isMemorized ? "2px solid var(--color-sage)" : "none" }}
+              >
+                <div className="flex justify-between items-start">
+                  <span
+                    className="text-xs font-semibold uppercase tracking-widest"
+                    style={{ color: "var(--color-oak)" }}
+                  >
+                    Question · #{card.id.toString().padStart(2, "0")}
+                  </span>
+                  {isMemorized && (
+                    <span
+                      className="text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 shadow-sm text-white"
+                      style={{ backgroundColor: "var(--color-sage)" }}
+                    >
+                      <Check className="size-3" /> Hafal
+                    </span>
+                  )}
+                </div>
                 <p className="text-2xl sm:text-3xl font-bold leading-snug text-foreground">
                   {card.question}
                 </p>
-                <span className="text-xs text-muted-foreground">Tap to flip →</span>
+                <div className="flex justify-between items-end">
+                  <span className="text-xs text-muted-foreground">Tap to flip →</span>
+                  <button
+                    onClick={toggleMemorized}
+                    className="z-20 text-xs font-bold px-4 py-2 rounded-full border shadow-sm transition hover:scale-105"
+                    style={{
+                      backgroundColor: isMemorized ? "var(--color-secondary)" : "white",
+                      color: isMemorized ? "var(--color-blush)" : "var(--color-foreground)",
+                      borderColor: "var(--color-border)"
+                    }}
+                  >
+                    {isMemorized ? "Batal Hafal" : "Tandai Hafal"}
+                  </button>
+                </div>
               </div>
+
               {/* Back */}
               <div
                 className="absolute inset-0 backface-hidden rotate-y-180 rounded-3xl p-8 shadow-soft flex flex-col justify-between"
@@ -97,17 +197,24 @@ export function FlashcardCarousel({ cards }: { cards: Flashcard[] }) {
           <ChevronLeft className="size-5" />
         </motion.button>
         <div className="flex gap-1.5">
-          {cards.map((_, i) => (
-            <span
-              key={i}
-              className="h-1.5 rounded-full transition-all"
-              style={{
-                width: i === index ? 24 : 8,
-                backgroundColor:
-                  i === index ? "var(--color-blush)" : "var(--color-border)",
-              }}
-            />
-          ))}
+          {displayCards.map((c, i) => {
+            const isMem = memorizedCards.includes(c.id);
+            return (
+              <span
+                key={i}
+                className="h-1.5 rounded-full transition-all shrink-0"
+                style={{
+                  width: i === index ? 24 : 8,
+                  backgroundColor:
+                    i === index
+                      ? "var(--color-blush)"
+                      : isMem
+                      ? "var(--color-sage)"
+                      : "var(--color-border)",
+                }}
+              />
+            );
+          })}
         </div>
         <motion.button
           whileTap={{ scale: 0.94 }}
