@@ -19,7 +19,7 @@ PinterQ is an AI-powered, gamified study companion designed to help students tra
 
 ### Prerequisites
 Make sure you have Node.js and npm installed on your machine.
-The [PinterQ Backend](https://github.com/YOUR_GITHUB_USERNAME/pinterq-backend) must be running locally on port `8080`.
+The [PinterQ Backend](https://github.com/aucloire/II2210-18224071-PinterQ-BackEnd) must be running locally on port `8080`.
 
 ### Installation
 1. Clone this repository:
