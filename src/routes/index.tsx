@@ -102,6 +102,20 @@ function Dashboard() {
     }
   };
 
+  const handleGenerateAdaptive = async (difficulty: "HOTS" | "DASAR") => {
+    if (!activeSubject) return;
+    setIsLoadingData(true);
+    try {
+      await api.generateAdaptive(activeSubject, difficulty);
+      setStudyKey((k) => k + 1);
+      setTab("quizzes");
+    } catch (err) {
+      alert("Gagal mengenerate kuis adaptif.");
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     logout();
@@ -258,7 +272,11 @@ function Dashboard() {
               {tab === "flashcards" ? (
                 cards.length > 0 ? <FlashcardCarousel cards={cards} /> : <div className="text-center py-10 opacity-60">Belum ada flashcard. Silakan generate materi.</div>
               ) : (
-                quiz.length > 0 ? <QuizRunner questions={quiz} /> : <div className="text-center py-10 opacity-60">Belum ada kuis. Silakan generate materi.</div>
+                quiz.length > 0 ? (
+                  <QuizRunner questions={quiz} onGenerateAdaptive={handleGenerateAdaptive} />
+                ) : (
+                  <div className="text-center py-10 opacity-60">Belum ada kuis. Silakan generate materi.</div>
+                )
               )}
             </motion.div>
           ) : null}

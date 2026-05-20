@@ -231,7 +231,7 @@ export function FlashcardCarousel({ cards }: { cards: Flashcard[] }) {
 
 /* ---------------- Quiz Runner (1-by-1) ---------------- */
 
-export function QuizRunner({ questions }: { questions: QuizQuestion[] }) {
+export function QuizRunner({ questions, onGenerateAdaptive }: { questions: QuizQuestion[], onGenerateAdaptive?: (difficulty: "HOTS" | "DASAR") => void }) {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -279,13 +279,46 @@ export function QuizRunner({ questions }: { questions: QuizQuestion[] }) {
         <p className="mt-2 text-muted-foreground">
           Skor kamu: <span className="font-semibold text-foreground">{score}</span> / {questions.length} ({pct}%)
         </p>
-        <button
-          onClick={restart}
-          className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-white shadow-glow"
-          style={{ backgroundColor: "var(--color-blush)" }}
-        >
-          <RotateCcw className="size-4" /> Coba lagi
-        </button>
+
+        <div className="mt-8 flex flex-col gap-3 max-w-sm mx-auto">
+          {pct >= 80 && onGenerateAdaptive && (
+            <div className="mb-2">
+              <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-oak)" }}>
+                Kamu menguasai materi ini!
+              </p>
+              <button
+                onClick={() => onGenerateAdaptive("HOTS")}
+                className="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-white shadow-glow transition hover:scale-105"
+                style={{ backgroundColor: "var(--color-blush)" }}
+              >
+                🔥 Generate Level Analisis (HOTS)
+              </button>
+            </div>
+          )}
+
+          {pct <= 50 && onGenerateAdaptive && (
+            <div className="mb-2">
+              <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-oak)" }}>
+                Masih bingung? Ayo matangkan dasarnya.
+              </p>
+              <button
+                onClick={() => onGenerateAdaptive("DASAR")}
+                className="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl font-semibold text-white shadow-glow transition hover:scale-105"
+                style={{ backgroundColor: "var(--color-sage)" }}
+              >
+                💡 Generate Konsep Dasar
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={restart}
+            className="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl font-bold text-foreground border-2 transition hover:scale-105"
+            style={{ borderColor: "var(--color-border)", backgroundColor: "transparent" }}
+          >
+            <RotateCcw className="size-4" /> Coba lagi
+          </button>
+        </div>
       </motion.div>
     );
   }

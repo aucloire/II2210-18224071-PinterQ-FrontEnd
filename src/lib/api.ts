@@ -50,6 +50,16 @@ export const api = {
     return res.text(); 
   },
 
+  generateAdaptive: async (categoryId: number, difficulty: string) => {
+    const res = await fetch(`${BASE_URL}/study/generate-adaptive`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ categoryId, difficulty }),
+    });
+    if (!res.ok) throw new Error("Gagal generate kuis adaptif");
+    return res.text();
+  },
+
   // === GET MATERI ===
   getFlashcards: async (categoryId: number) => {
     const res = await fetch(`${BASE_URL}/study/flashcards/${categoryId}`);
