@@ -1,6 +1,7 @@
 import { getToken } from "./auth";
 
-const BASE_URL = "https://api-aucloire.stei.my.id/api";
+// Gunakan environment variable atau fallback ke production URL
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || "https://api-aucloire.stei.my.id/api").replace(/\/$/, "");
 
 function authHeaders(): HeadersInit {
   const token = getToken();
