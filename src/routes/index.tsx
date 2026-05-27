@@ -16,8 +16,8 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "PinterQ — Study Dashboard" },
-      { name: "description", content: "Flashcards & kuis interaktif untuk mahasiswa." },
+      { title: "PinterQ — AI Study Assistant" },
+      { name: "description", content: "Platform belajar adaptif berbasis AI." },
     ],
   }),
 });
@@ -133,8 +133,8 @@ function Dashboard() {
   const activeSubj = subjects.find((s) => s.id === activeSubject) ?? subjects[0];
 
   return (
-    <main className="min-h-screen w-full">
-      <header className="max-w-6xl mx-auto px-5 sm:px-8 pt-8 flex items-center justify-between">
+    <main className="min-h-screen w-full px-5 sm:px-8">
+      <header className="max-w-6xl mx-auto pt-8 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="size-9 rounded-2xl bg-primary flex items-center justify-center shadow-soft">
             <Sparkles className="size-4 text-white" />
@@ -165,26 +165,26 @@ function Dashboard() {
         </nav>
       </header>
 
-      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-12 pb-8">
+      <section className="max-w-6xl mx-auto pt-16 pb-8">
         <motion.div
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4 text-xs font-bold bg-white/40 border border-white/20"
+          className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-5 text-[11px] font-black uppercase tracking-widest bg-white/40 border border-white/20"
         >
           <Wand2 className="size-3.5 text-primary" />
           Halo, {user.username} 👋
         </motion.div>
-        <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
-          Mau belajar apa <span className="text-primary">hari ini?</span>
+        <h1 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tighter">
+          Mau belajar apa <br /><span className="text-primary">hari ini?</span>
         </h1>
-        <p className="mt-2 text-muted-foreground font-medium max-w-lg">
-          Tempel catatan kuliahmu, biarkan PinterQ meraciknya jadi kuis dan flashcard AI.
+        <p className="mt-4 text-muted-foreground font-medium max-w-lg">
+          Pilih subjek, tempel catatanmu, dan biarkan AI meracik kuis adaptif khusus untukmu.
         </p>
       </section>
 
-      <section className="max-w-6xl mx-auto px-5 sm:px-8 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-black uppercase tracking-widest text-oak">
+      <section className="max-w-6xl mx-auto pb-4">
+        <div className="flex items-end justify-between mb-4">
+          <span className="text-sm font-black uppercase tracking-widest text-oak leading-none">
             Mata Kuliah
           </span>
           {user.role !== "USER" && (
@@ -209,8 +209,8 @@ function Dashboard() {
                 key={s.id}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setActiveSubject(s.id)}
-                className={`shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-bold transition-all ${
-                  active ? "bg-primary text-white shadow-soft" : "bg-white/50 text-foreground hover:bg-white/80"
+                className={`shrink-0 inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-bold transition-all ${
+                  active ? "bg-primary text-white shadow-soft" : "glass hover:bg-white/70 text-foreground"
                 }`}
               >
                 <span>{s.name}</span>
@@ -219,37 +219,37 @@ function Dashboard() {
           })}
           <button
             onClick={() => setSubjOpen(true)}
-            className="shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-bold border-2 border-dashed border-oak/30 text-oak hover:bg-white/50 transition-all"
+            className="shrink-0 inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-bold border-2 border-dashed border-oak/30 text-oak hover:bg-oak/5 transition-all"
           >
             <Plus className="size-4" /> Tambah Matkul
           </button>
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-6 pb-20">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
+      <section className="max-w-6xl mx-auto pt-6 pb-24">
+        <div className="flex items-end justify-between flex-wrap gap-6 mb-8">
           <div>
-            <span className="text-xs font-black uppercase tracking-widest text-oak">
+            <span className="text-sm font-black uppercase tracking-widest text-oak leading-none">
               Ruang Belajar
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold mt-1 tracking-tight">
-              {activeSubj?.name || "Belum ada mata kuliah"}
+            <h2 className="text-3xl sm:text-4xl font-black mt-2 tracking-tight">
+              {activeSubj?.name || "Belum ada materi"}
             </h2>
           </div>
 
           {activeSubj && (
-            <div className="p-1 glass-strong rounded-2xl shadow-soft flex gap-1">
+            <div className="p-1.5 glass-strong rounded-2xl shadow-soft flex gap-1">
               {(["flashcards", "quizzes"] as Tab[]).map((t) => {
                 const active = tab === t;
                 return (
                   <button
                     key={t}
                     onClick={() => setTab(t)}
-                    className={`relative inline-flex items-center gap-2 px-5 h-9 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                    className={`relative inline-flex items-center gap-2 px-6 h-10 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                       active ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {t === "flashcards" ? <Layers className="size-4" /> : <BookOpen className="size-4" />}
+                    {t === "flashcards" ? <Layers className="size-3.5" /> : <BookOpen className="size-3.5" />}
                     <span className="capitalize">{t}</span>
                   </button>
                 );
@@ -272,12 +272,12 @@ function Dashboard() {
               transition={{ duration: 0.2 }}
             >
               {tab === "flashcards" ? (
-                cards.length > 0 ? <FlashcardCarousel cards={cards} /> : <div className="text-center py-20 glass rounded-[32px] border border-dashed border-border/50 text-muted-foreground font-medium">Belum ada flashcard. Silakan generate materi.</div>
+                cards.length > 0 ? <FlashcardCarousel cards={cards} /> : <div className="text-center py-20 glass rounded-[32px] border border-dashed border-border/50 text-muted-foreground font-bold">Belum ada flashcard. Silakan generate materi.</div>
               ) : (
                 quiz.length > 0 ? (
                   <QuizRunner questions={quiz} onGenerateAdaptive={handleGenerateAdaptive} onComplete={handleSubmitScore} />
                 ) : (
-                  <div className="text-center py-20 glass rounded-[32px] border border-dashed border-border/50 text-muted-foreground font-medium">Belum ada kuis. Silakan generate materi.</div>
+                  <div className="text-center py-20 glass rounded-[32px] border border-dashed border-border/50 text-muted-foreground font-bold">Belum ada kuis. Silakan generate materi.</div>
                 )
               )}
             </motion.div>
