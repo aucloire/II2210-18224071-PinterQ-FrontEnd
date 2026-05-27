@@ -16,8 +16,8 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "PinterQ — Study Dashboard" },
-      { name: "description", content: "Flashcards & kuis interaktif untuk mahasiswa." },
+      { title: "PinterQ — AI Study Assistant" },
+      { name: "description", content: "Platform belajar adaptif berbasis AI." },
     ],
   }),
 });
@@ -46,7 +46,7 @@ function Dashboard() {
     if (userId) {
       api.getCategories(userId).then((cats) => {
         setSubjects(cats);
-        if (cats.length > 0) setActiveSubject(cats[0].id);
+        if (cats.length > 0 && !activeSubject) setActiveSubject(cats[0].id);
       }).catch(err => console.error(err));
     }
   }, [user]);
@@ -98,7 +98,7 @@ function Dashboard() {
       setStudyKey((k) => k + 1); 
       setTab("flashcards");
     } catch (err) {
-      alert("Gagal mengenerate materi. Pastikan API key valid & backend menyala.");
+      alert("Gagal mengenerate materi. Pastikan API key valid.");
       throw err; 
     }
   };
@@ -128,11 +128,6 @@ function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/login" });
-  };
-
   if (!ready || !user) return null;
 
   const activeSubj = subjects.find((s) => s.id === activeSubject) ?? subjects[0];
@@ -141,77 +136,76 @@ function Dashboard() {
     <main className="min-h-screen w-full">
       <header className="max-w-6xl mx-auto px-5 sm:px-8 pt-8 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div
-            className="size-9 rounded-2xl flex items-center justify-center shadow-soft"
-            style={{ backgroundColor: "var(--color-blush)" }}
-          >
+          <div className="size-9 rounded-2xl bg-primary flex items-center justify-center shadow-soft">
             <Sparkles className="size-4 text-white" />
           </div>
           <span className="text-xl font-bold tracking-tight">PinterQ</span>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex flex-col items-end leading-tight mr-2">
-            <span className="text-xs text-muted-foreground">Logged in as</span>
-            <span className="text-sm font-semibold">@{user.username} ({user.role})</span>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="hidden sm:flex flex-col items-end leading-tight mr-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Logged in as</span>
+            <span className="text-sm font-bold">@{user.username}</span>
           </div>
-          <Link to="/history" className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full glass text-sm font-medium hover:bg-white/70 transition">
-            <History className="size-3.5" />
-            <span className="hidden sm:inline">Riwayat</span>
-          </Link>
-          {user.role === "SUPERADMIN" && (
-            <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full glass text-sm font-medium hover:bg-white/70 transition text-[#3d405b]">
-              <ShieldCheck className="size-3.5" />
-              <span className="hidden sm:inline">Admin</span>
+          
+          <nav className="flex items-center gap-2">
+            <Link to="/history" className="size-10 rounded-full glass flex items-center justify-center shadow-soft hover:scale-105 active:scale-95 transition-all text-foreground/70" title="Riwayat Belajar">
+              <History className="size-4" />
             </Link>
-          )}
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full glass text-sm font-medium hover:bg-white/70 transition"
-          >
-            <LogOut className="size-3.5" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
+            
+            {user.role === "SUPERADMIN" && (
+              <Link to="/admin" className="size-10 rounded-full glass flex items-center justify-center shadow-soft hover:scale-105 active:scale-95 transition-all text-primary" title="Admin Panel">
+                <ShieldCheck className="size-4" />
+              </Link>
+            )}
+            
+            <button
+              onClick={() => { logout(); navigate({ to: "/login" }); }}
+              className="size-10 rounded-full glass flex items-center justify-center shadow-soft hover:bg-destructive/10 hover:text-destructive active:scale-95 transition-all text-foreground/70"
+              title="Logout"
+            >
+              <LogOut className="size-4" />
+            </button>
+          </nav>
         </div>
       </header>
 
-      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-10 sm:pt-14 pb-6">
+      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-10 sm:pt-16 pb-6">
         <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-4 text-xs font-semibold bg-white/50 border border-black/5"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-5 text-[11px] font-black uppercase tracking-widest bg-white/40 border border-white/20 shadow-soft"
         >
-          <Wand2 className="size-3.5" />
+          <Wand2 className="size-3.5 text-primary" />
           Halo, {user.username} 👋
         </motion.div>
-        <h1 className="text-3xl sm:text-5xl font-bold leading-tight">
-          Mau belajar apa <span style={{ color: "var(--color-blush)" }}>hari ini?</span>
+        <h1 className="text-4xl sm:text-6xl font-black leading-[0.95] tracking-tighter">
+          Mau belajar apa <br /><span className="text-primary">hari ini?</span>
         </h1>
-        <p className="mt-2 text-muted-foreground max-w-xl">
-          Pilih subjek, tempel catatan kuliahmu, lalu biarkan PinterQ meraciknya jadi kuis dan flashcard AI.
+        <p className="mt-4 text-muted-foreground font-medium max-w-lg leading-relaxed">
+          Pilih subjek, tempel catatanmu, dan biarkan AI meracik kuis adaptif khusus untukmu.
         </p>
       </section>
 
-      <section className="max-w-6xl mx-auto px-5 sm:px-8 pb-2">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--color-oak)" }}>
+      <section className="max-w-6xl mx-auto px-5 sm:px-8 pb-4">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-oak">
             Mata Kuliah
           </span>
           {user.role !== "USER" && (
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setGenOpen(true)}
               disabled={subjects.length === 0}
-              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-white shadow-glow disabled:opacity-50"
-              style={{ backgroundColor: "var(--color-blush)" }}
+              className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-sm font-bold text-white shadow-glow bg-primary disabled:opacity-50"
             >
-              <Sparkles className="size-3.5" />
+              <Sparkles className="size-4" />
               Generate Materi
             </motion.button>
           )}
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-3 overflow-x-auto pb-4 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {subjects.map((s) => {
             const active = s.id === activeSubject;
             return (
@@ -219,12 +213,9 @@ function Dashboard() {
                 key={s.id}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setActiveSubject(s.id)}
-                className="shrink-0 inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-medium transition-all"
-                style={{
-                  backgroundColor: active ? "var(--color-oak)" : "var(--color-secondary)",
-                  color: active ? "white" : "var(--color-foreground)",
-                  boxShadow: active ? "var(--shadow-soft)" : "none",
-                }}
+                className={`shrink-0 inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-bold transition-all ${
+                  active ? "bg-oak text-white shadow-soft" : "glass hover:bg-white/60 text-foreground"
+                }`}
               >
                 <span>{s.name}</span>
               </motion.button>
@@ -232,46 +223,38 @@ function Dashboard() {
           })}
           <button
             onClick={() => setSubjOpen(true)}
-            className="shrink-0 inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm font-medium border border-dashed transition hover:bg-white/50"
-            style={{ borderColor: "var(--color-oak)", color: "var(--color-oak)" }}
+            className="shrink-0 inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-bold border-2 border-dashed border-oak/30 text-oak hover:bg-oak/5 transition-all"
           >
             <Plus className="size-4" /> Tambah Matkul
           </button>
         </div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-6 pb-20">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-6">
+      <section className="max-w-6xl mx-auto px-5 sm:px-8 pt-6 pb-24">
+        <div className="flex items-end justify-between flex-wrap gap-6 mb-8">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--color-oak)" }}>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-oak">
               Ruang Belajar
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold mt-1 flex items-center gap-2">
-              {activeSubj?.name || "Belum ada mata kuliah"}
+            <h2 className="text-3xl sm:text-4xl font-black mt-2 tracking-tight">
+              {activeSubj?.name || "Belum ada materi"}
             </h2>
           </div>
 
           {activeSubj && (
-            <div className="relative inline-flex p-1 rounded-full" style={{ backgroundColor: "var(--color-secondary)" }}>
+            <div className="p-1.5 glass-strong rounded-2xl shadow-soft flex gap-1">
               {(["flashcards", "quizzes"] as Tab[]).map((t) => {
                 const active = tab === t;
                 return (
                   <button
                     key={t}
                     onClick={() => setTab(t)}
-                    className="relative z-10 inline-flex items-center gap-2 px-4 h-9 rounded-full text-sm font-semibold transition-colors"
-                    style={{ color: active ? "white" : "var(--color-foreground)" }}
+                    className={`relative inline-flex items-center gap-2 px-6 h-10 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                      active ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                    {active && (
-                      <motion.span
-                        layoutId="tab-pill"
-                        className="absolute inset-0 rounded-full -z-10"
-                        style={{ backgroundColor: "var(--color-blush)" }}
-                        transition={{ type: "spring", stiffness: 250, damping: 26 }}
-                      />
-                    )}
-                    {t === "flashcards" ? <Layers className="size-4" /> : <BookOpen className="size-4" />}
-                    <span className="capitalize">{t}</span>
+                    {t === "flashcards" ? <Layers className="size-3.5" /> : <BookOpen className="size-3.5" />}
+                    <span>{t}</span>
                   </button>
                 );
               })}
@@ -281,28 +264,39 @@ function Dashboard() {
 
         <AnimatePresence mode="wait">
           {isLoadingData ? (
-             <div className="flex justify-center items-center py-20 text-muted-foreground">
-               <Loader2 className="size-8 animate-spin" />
+             <div className="flex justify-center items-center py-24">
+               <Loader2 className="size-10 animate-spin text-primary/40" />
              </div>
           ) : activeSubj ? (
             <motion.div
               key={tab + "-" + activeSubject + "-" + studyKey}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ type: "spring", stiffness: 140, damping: 20 }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 100, damping: 20 }}
             >
               {tab === "flashcards" ? (
-                cards.length > 0 ? <FlashcardCarousel cards={cards} /> : <div className="text-center py-10 opacity-60">Belum ada flashcard. Silakan generate materi.</div>
+                cards.length > 0 ? <FlashcardCarousel cards={cards} /> : (
+                  <div className="text-center py-20 glass rounded-[40px] border border-dashed border-border/50">
+                    <p className="font-bold text-muted-foreground/60 italic">Belum ada flashcard. Silakan generate materi.</p>
+                  </div>
+                )
               ) : (
                 quiz.length > 0 ? (
                   <QuizRunner questions={quiz} onGenerateAdaptive={handleGenerateAdaptive} onComplete={handleSubmitScore} />
                 ) : (
-                  <div className="text-center py-10 opacity-60">Belum ada kuis. Silakan generate materi.</div>
+                  <div className="text-center py-20 glass rounded-[40px] border border-dashed border-border/50">
+                    <p className="font-bold text-muted-foreground/60 italic">Belum ada kuis. Silakan generate materi.</p>
+                  </div>
                 )
               )}
             </motion.div>
-          ) : null}
+          ) : (
+            <div className="text-center py-32 glass rounded-[40px] border border-dashed border-border/50">
+               <Plus className="size-12 mx-auto text-muted-foreground/20 mb-4" />
+               <h3 className="text-xl font-bold text-muted-foreground/40">Pilih atau buat mata kuliah untuk memulai</h3>
+            </div>
+          )}
         </AnimatePresence>
       </section>
 
