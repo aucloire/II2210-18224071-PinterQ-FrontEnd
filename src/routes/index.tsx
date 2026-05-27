@@ -1,7 +1,7 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Plus, LogOut, Layers, BookOpen, Wand2, Loader2 } from "lucide-react";
+import { Sparkles, Plus, LogOut, Layers, BookOpen, Wand2, Loader2, ShieldCheck, History } from "lucide-react";
 import { FlashcardCarousel, QuizRunner } from "@/components/study";
 import { GenerateModal, NewSubjectModal } from "@/components/modals";
 import { getStoredUser, useAuth } from "@/lib/auth";
@@ -42,14 +42,14 @@ function Dashboard() {
   const [studyKey, setStudyKey] = useState(0); 
 
   useEffect(() => {
-    const userId = Number(localStorage.getItem("userId"));
+    const userId = Number(user?.userId);
     if (userId) {
       api.getCategories(userId).then((cats) => {
         setSubjects(cats);
         if (cats.length > 0) setActiveSubject(cats[0].id);
       }).catch(err => console.error(err));
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (activeSubject) {
@@ -64,7 +64,8 @@ function Dashboard() {
           question: q.question,
           options: [q.optionA, q.optionB, q.optionC, q.optionD],
           correctIndex: ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer),
-          explanation: q.explanation
+          explanation: q.explanation,
+          materialId: q.material?.id
         }));
         setQuiz(mappedQuizzes);
       }).finally(() => {
@@ -79,7 +80,7 @@ function Dashboard() {
 
   const addSubject = async (name: string, emoji: string) => {
     try {
-      const userId = Number(localStorage.getItem("userId"));
+      const userId = Number(user?.userId);
       const fullName = `${emoji} ${name}`; 
       const newCat = await api.createCategory(userId, fullName);
       setSubjects([...subjects, { id: newCat.id, name: newCat.name }]);
@@ -91,7 +92,7 @@ function Dashboard() {
 
   const handleGenerate = async (subjectId: number, text: string) => {
     try {
-      const userId = Number(localStorage.getItem("userId"));
+      const userId = Number(user?.userId);
       await api.generateStudyMaterial(userId, subjectId, "Materi Baru", text);
       setActiveSubject(subjectId);
       setStudyKey((k) => k + 1); 
@@ -116,8 +117,18 @@ function Dashboard() {
     }
   };
 
+  const handleSubmitScore = async (score: number) => {
+    if (!user || quiz.length === 0) return;
+    const materialId = (quiz[0] as any).materialId;
+    if (!materialId) return;
+    try {
+      await api.submitQuizAttempt(Number(user.userId), materialId, score);
+    } catch (err) {
+      console.error("Gagal simpan skor:", err);
+    }
+  };
+
   const handleLogout = () => {
-    localStorage.clear();
     logout();
     navigate({ to: "/login" });
   };
@@ -139,10 +150,20 @@ function Dashboard() {
           <span className="text-xl font-bold tracking-tight">PinterQ</span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex flex-col items-end leading-tight">
+          <div className="hidden sm:flex flex-col items-end leading-tight mr-2">
             <span className="text-xs text-muted-foreground">Logged in as</span>
-            <span className="text-sm font-semibold">@{user.username}</span>
+            <span className="text-sm font-semibold">@{user.username} ({user.role})</span>
           </div>
+          <Link to="/history" className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full glass text-sm font-medium hover:bg-white/70 transition">
+            <History className="size-3.5" />
+            <span className="hidden sm:inline">Riwayat</span>
+          </Link>
+          {user.role === "SUPERADMIN" && (
+            <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full glass text-sm font-medium hover:bg-white/70 transition text-[#3d405b]">
+              <ShieldCheck className="size-3.5" />
+              <span className="hidden sm:inline">Admin</span>
+            </Link>
+          )}
           <button
             onClick={handleLogout}
             className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full glass text-sm font-medium hover:bg-white/70 transition"
@@ -175,17 +196,19 @@ function Dashboard() {
           <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--color-oak)" }}>
             Mata Kuliah
           </span>
-          <motion.button
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => setGenOpen(true)}
-            disabled={subjects.length === 0}
-            className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-white shadow-glow disabled:opacity-50"
-            style={{ backgroundColor: "var(--color-blush)" }}
-          >
-            <Sparkles className="size-3.5" />
-            Generate Materi
-          </motion.button>
+          {user.role !== "USER" && (
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setGenOpen(true)}
+              disabled={subjects.length === 0}
+              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-white shadow-glow disabled:opacity-50"
+              style={{ backgroundColor: "var(--color-blush)" }}
+            >
+              <Sparkles className="size-3.5" />
+              Generate Materi
+            </motion.button>
+          )}
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -273,7 +296,7 @@ function Dashboard() {
                 cards.length > 0 ? <FlashcardCarousel cards={cards} /> : <div className="text-center py-10 opacity-60">Belum ada flashcard. Silakan generate materi.</div>
               ) : (
                 quiz.length > 0 ? (
-                  <QuizRunner questions={quiz} onGenerateAdaptive={handleGenerateAdaptive} />
+                  <QuizRunner questions={quiz} onGenerateAdaptive={handleGenerateAdaptive} onComplete={handleSubmitScore} />
                 ) : (
                   <div className="text-center py-10 opacity-60">Belum ada kuis. Silakan generate materi.</div>
                 )

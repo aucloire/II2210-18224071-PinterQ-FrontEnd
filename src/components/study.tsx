@@ -231,7 +231,15 @@ export function FlashcardCarousel({ cards }: { cards: Flashcard[] }) {
 
 /* ---------------- Quiz Runner (1-by-1) ---------------- */
 
-export function QuizRunner({ questions, onGenerateAdaptive }: { questions: QuizQuestion[], onGenerateAdaptive?: (difficulty: "HOTS" | "DASAR") => void }) {
+export function QuizRunner({ 
+  questions, 
+  onGenerateAdaptive,
+  onComplete
+}: { 
+  questions: QuizQuestion[], 
+  onGenerateAdaptive?: (difficulty: "HOTS" | "DASAR") => void,
+  onComplete?: (score: number) => void
+}) {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -247,7 +255,10 @@ export function QuizRunner({ questions, onGenerateAdaptive }: { questions: QuizQ
 
   const handleNext = () => {
     if (index + 1 >= questions.length) {
+      const finalScore = score + (selected === q.correctIndex ? 1 : 0);
+      const pct = Math.round((finalScore / questions.length) * 100);
       setFinished(true);
+      if (onComplete) onComplete(pct);
       return;
     }
     setIndex(index + 1);

@@ -17,7 +17,10 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) throw new Error("Gagal login");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Gagal login");
+    }
     return res.json();
   },
 
@@ -27,7 +30,10 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password, role }),
     });
-    if (!res.ok) throw new Error("Gagal register");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Gagal register");
+    }
     return res.json();
   },
 
@@ -84,7 +90,7 @@ export const api = {
 
   // === QUIZ SUBMISSION ===
   submitQuizAttempt: async (userId: number, materialId: number, score: number) => {
-    const res = await fetch(`${BASE_URL}/study/quiz-attempt`, {
+    const res = await fetch(`${BASE_URL}/study/submit-attempt`, {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ userId, materialId, score }),
@@ -94,7 +100,7 @@ export const api = {
   },
 
   getQuizHistory: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/study/quiz-history/${userId}`);
+    const res = await fetch(`${BASE_URL}/study/history/${userId}`);
     if (!res.ok) throw new Error("Gagal mengambil riwayat kuis");
     return res.json();
   },
@@ -105,6 +111,14 @@ export const api = {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal mengambil daftar user");
+    return res.json();
+  },
+
+  getAllUsers: async () => {
+    const res = await fetch(`${BASE_URL}/admin/all-users`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil semua user");
     return res.json();
   },
 
@@ -119,10 +133,20 @@ export const api = {
 
   rejectUser: async (userId: number) => {
     const res = await fetch(`${BASE_URL}/admin/reject/${userId}`, {
-      method: "DELETE",
+      method: "PUT",
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal reject user");
+    return res.json();
+  },
+
+  setRole: async (userId: number, role: string) => {
+    const res = await fetch(`${BASE_URL}/admin/set-role/${userId}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ role }),
+    });
+    if (!res.ok) throw new Error("Gagal mengubah role");
     return res.json();
   },
 };
