@@ -2,13 +2,13 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Loader2 } from "lucide-react";
-import { getStoredUser, useAuth } from "@/lib/auth";
-import { api } from "@/lib/api"; // <-- Import jembatan API kita
+import { setStoredUser } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/login")({
   component: Login,
   beforeLoad: () => {
-    if (typeof window !== "undefined" && getStoredUser()) {
+    if (typeof window !== "undefined" && window.localStorage.getItem("pinterq.auth")) {
       throw redirect({ to: "/" });
     }
   },
@@ -23,13 +23,11 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState(""); // <-- Tambahan state Email
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
-  const [isLoading, setIsLoading] = useState(false); // <-- Tambahan state Loading
-  const [errorMsg, setErrorMsg] = useState(""); // <-- Tambahan state Error
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
@@ -48,17 +46,23 @@ function Login() {
         data = await api.register(username, email, password);
       }
 
-      // Simpan data kunci ke localStorage agar bisa dipakai di halaman lain
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("username", data.username);
+      setStoredUser({
+        userId: String(data.userId),
+        username: data.username,
+        token: data.token || "",
+        role: data.role || "USER",
+      });
 
-      // Sinkronisasi dengan context bawaan frontend
-      login(data.username); 
-      
-      // Redirect ke halaman utama
       navigate({ to: "/" });
     } catch (err: any) {
-      setErrorMsg(err.message || "Gagal menghubungi server. Pastikan Backend menyala.");
+      const msg = err.message || "Gagal menghubungi server. Pastikan Backend menyala.";
+      if (err.message?.includes("401") || err.message?.includes("tidak valid")) {
+        setErrorMsg("Username atau password salah.");
+      } else if (err.message?.includes("sudah")) {
+        setErrorMsg(err.message);
+      } else {
+        setErrorMsg(msg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -92,10 +96,9 @@ function Login() {
         </p>
 
         <form onSubmit={submit} className="mt-7 space-y-3">
-          {/* Tampilan Error Banner */}
           <AnimatePresence>
             {errorMsg && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
@@ -120,7 +123,6 @@ function Login() {
             />
           </div>
 
-          {/* Kolom Email (Muncul dengan animasi hanya saat Register) */}
           <AnimatePresence>
             {mode === "register" && (
               <motion.div
@@ -168,7 +170,7 @@ function Login() {
             style={{ backgroundColor: "var(--color-blush)" }}
           >
             {isLoading ? (
-              <Loader2 className="size-5 animate-spin" /> // Animasi Muter
+              <Loader2 className="size-5 animate-spin" />
             ) : mode === "login" ? (
               "Masuk"
             ) : (
@@ -183,7 +185,7 @@ function Login() {
             type="button"
             onClick={() => {
               setMode(mode === "login" ? "register" : "login");
-              setErrorMsg(""); // Reset error saat ganti mode
+              setErrorMsg("");
             }}
             className="font-semibold text-foreground hover:underline"
           >

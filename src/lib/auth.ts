@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 
-export type AuthUser = { userId: string; username: string };
+export type AuthUser = {
+  userId: string;
+  username: string;
+  token: string;
+  role: string;
+};
 
 const KEY = "pinterq.auth";
 
@@ -12,6 +17,10 @@ export function getStoredUser(): AuthUser | null {
   } catch {
     return null;
   }
+}
+
+export function getToken(): string | null {
+  return getStoredUser()?.token ?? null;
 }
 
 export function setStoredUser(user: AuthUser | null) {
@@ -44,6 +53,8 @@ export function useAuth() {
       const u: AuthUser = {
         userId: `u_${Math.random().toString(36).slice(2, 10)}`,
         username: username.trim() || "Student",
+        token: "",
+        role: "USER",
       };
       setStoredUser(u);
       return u;
