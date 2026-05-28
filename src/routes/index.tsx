@@ -14,6 +14,12 @@ export const Route = createFileRoute("/")({
       throw redirect({ to: "/login" });
     }
   },
+  head: () => ({
+    meta: [
+      { title: "PinterQ — AI Study Assistant" },
+      { name: "description", content: "Platform belajar adaptif berbasis AI." },
+    ],
+  }),
 });
 
 type Tab = "flashcards" | "quizzes";
@@ -67,6 +73,47 @@ function Dashboard() {
       });
     }
   }, [activeSubject, studyKey]);
+
+  useEffect(() => {
+    if (ready && !user) navigate({ to: "/login" });
+  }, [ready, user, navigate]);
+
+  const addSubject = async (name: string, emoji: string) => {
+    try {
+      const userId = Number(user?.userId);
+      const fullName = `${emoji} ${name}`; 
+      const newCat = await api.createCategory(userId, fullName);
+      setSubjects([...subjects, { id: newCat.id, name: newCat.name }]);
+      setActiveSubject(newCat.id);
+    } catch (err) {
+      alert("Gagal menambahkan mata kuliah.");
+    }
+  };
+
+  const handleGenerateAdaptive = async (difficulty: "HOTS" | "DASAR") => {
+    if (!activeSubject) return;
+    setIsLoadingData(true);
+    try {
+      await api.generateAdaptive(activeSubject, difficulty);
+      setStudyKey((k) => k + 1);
+      setTab("quizzes");
+    } catch (err) {
+      alert("Gagal mengenerate kuis adaptif.");
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  const handleSubmitScore = async (score: number) => {
+    if (!user || quiz.length === 0) return;
+    const materialId = (quiz[0] as any).materialId;
+    if (!materialId) return;
+    try {
+      await api.submitQuizAttempt(Number(user.userId), materialId, score);
+    } catch (err) {
+      console.error("Gagal simpan skor:", err);
+    }
+  };
 
   if (!ready || !user) return null;
 
@@ -236,9 +283,14 @@ function Dashboard() {
         subjects={subjects}
         defaultSubjectId={activeSubject ?? 0}
         onGenerate={async (id, text) => {
-          await api.generateStudyMaterial(Number(user.userId), id, "Materi Baru", text);
-          setStudyKey(k => k + 1);
-          setTab("flashcards");
+          try {
+             await api.generateStudyMaterial(Number(user.userId), id, "Materi Baru", text);
+             setStudyKey(k => k + 1);
+             setTab("flashcards");
+             setGenOpen(false);
+          } catch (err) {
+             alert("Gagal generate materi.");
+          }
         }}
       />
       <NewSubjectModal open={subjOpen} onClose={() => setSubjOpen(false)} onCreate={addSubject} />
