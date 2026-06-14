@@ -11,6 +11,7 @@ export type QuizQuestion = {
   options: string[];
   correctIndex: number;
   explanation?: string;
+  materialId?: number;
 };
 
 /* ---------------- Flashcard Carousel ---------------- */

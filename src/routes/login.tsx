@@ -43,11 +43,17 @@ function Login() {
     try {
       let data;
       if (mode === "login") {
-        data = await api.login(username, password);
+        const data = await api.login(username, password);
+        // Fetch profile to ensure fullName is populated correctly
+        let fullName = data.fullName || data.username;
+        try {
+          const profile = await api.getProfile(Number(data.userId));
+          if (profile.fullName) fullName = profile.fullName;
+        } catch { /* fall back to login response */ }
         setStoredUser({
           userId: String(data.userId),
           username: data.username,
-          fullName: data.fullName || data.username,
+          fullName,
           role: data.role || "MURID",
           profileImageUrl: data.profileImageUrl || "",
           token: data.token || "",

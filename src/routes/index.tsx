@@ -76,7 +76,7 @@ function Dashboard() {
       <section className="max-w-6xl mx-auto pt-12 pb-4">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-            Halo, {user.fullName || user.username}! 👋
+            Halo, {user.fullName || user.username}!
           </h1>
           <p className="text-sm text-muted-foreground mt-1 font-medium">
             {normalizedRole(user.role) === "SUPERADMIN" && "Kelola pengguna dan setelan platform."}

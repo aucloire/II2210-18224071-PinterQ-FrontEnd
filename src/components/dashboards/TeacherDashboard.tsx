@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus, Users, Trash2, Loader2, Copy, Check, BookOpen, Award, UsersRound
+  Plus, BookOpen, Copy, Loader2, Trash2, UsersRound, Award, ArrowRight
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -22,13 +22,9 @@ interface ClassItem {
 export function TeacherDashboard({ teacherId }: { teacherId: number }) {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Create class modal state
   const [createClassOpen, setCreateClassOpen] = useState(false);
   const [newClassName, setNewClassName] = useState("");
   const [creating, setCreating] = useState(false);
-
-  // Members for each class
   const [classMembers, setClassMembers] = useState<Record<number, any[]>>({});
 
   useEffect(() => {
@@ -64,7 +60,7 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
   };
 
   const handleDeleteClass = async (classId: number) => {
-    if (!confirm("Yakin ingin menghapus kelas ini? Semua materi/kuis di kelas akan ikut terhapus.")) return;
+    if (!confirm("Yakin ingin menghapus kelas ini?")) return;
     try {
       await api.deleteClass(classId);
       setClasses(classes.filter(c => c.id !== classId));
@@ -87,10 +83,7 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
     navigator.clipboard.writeText(code);
   };
 
-  // Overall stats
   const totalStudents = Object.values(classMembers).flat().length;
-  // Average quiz score placeholder (would need backend endpoint)
-  const avgScore = 0;
 
   if (loading) {
     return (
@@ -102,14 +95,14 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
 
   return (
     <div className="space-y-8">
-      {/* Stats */}
+      {/* Stats — 3 box side-by-side */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard title="Total Kelas" value={classes.length} icon={<BookOpen className="size-5" />} color="text-blue-600 bg-blue-50" />
         <StatCard title="Total Murid" value={totalStudents} icon={<UsersRound className="size-5" />} color="text-green-600 bg-green-50" />
-        <StatCard title="Rata-rata Nilai" value={avgScore} icon={<Award className="size-5" />} color="text-purple-600 bg-purple-50" />
+        <StatCard title="Rata-rata Nilai" value="-" icon={<Award className="size-5" />} color="text-purple-600 bg-purple-50" />
       </div>
 
-      {/* Create Class Button */}
+      {/* Kelas Saya Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold flex items-center gap-2">
           <BookOpen className="size-5 text-blue-600" />
@@ -161,12 +154,30 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="font-bold text-base">{cls.name}</h3>
-                <p className="text-xs text-muted-foreground">Kode Kelas: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-xs">{cls.classCode}</code></p>
+                <p className="text-xs text-muted-foreground">
+                  Kode Kelas: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-xs">{cls.classCode}</code>
+                </p>
               </div>
+              <Button size="sm" variant="ghost" onClick={() => handleCopyCode(cls.classCode)}
+                className="text-muted-foreground hover:text-foreground">
+                <Copy className="size-3.5 mr-1" /> Copy Kode
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <UsersRound className="size-4" />
+                <span>{cls.memberCount} murid</span>
+              </div>
+
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="ghost" onClick={() => handleCopyCode(cls.classCode)}
-                  className="text-muted-foreground hover:text-foreground">
-                  <Copy className="size-3.5 mr-1" /> Copy Kode
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => loadMembers(cls.id)}
+                  className="text-primary border-primary/30 hover:bg-primary/5 text-xs"
+                >
+                  Lihat Detail <ArrowRight className="size-3 ml-1" />
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => handleDeleteClass(cls.id)}
                   className="text-red-500 hover:text-red-700 hover:bg-red-50">
@@ -175,24 +186,19 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="size-4" />
-                <span>{cls.memberCount} murid</span>
-              </div>
-
-              {/* Show members if already loaded */}
-              {classMembers[cls.id]?.length > 0 && (
-                <details className="text-xs mt-2">
-                  <summary className="cursor-pointer font-medium text-muted-foreground">Lihat murid</summary>
-                  <ul className="mt-1 space-y-1 pl-2 border-l-2 border-gray-200">
-                    {classMembers[cls.id].map((m: any) => (
-                      <li key={m.id} className="text-muted-foreground">@{m.username} — {m.fullName || "-"}</li>
-                    ))}
-                  </ul>
-                </details>
-              )}
-            </div>
+            {/* Quick Members Preview */}
+            {classMembers[cls.id]?.length > 0 && (
+              <details className="text-xs mt-3">
+                <summary className="cursor-pointer font-medium text-muted-foreground">Lihat murid ({classMembers[cls.id].length})</summary>
+                <ul className="mt-1 space-y-1 pl-2 border-l-2 border-gray-200">
+                  {classMembers[cls.id].map((m: any) => (
+                    <li key={m.id} className="text-muted-foreground">
+                      @{m.username} — {m.fullName || "-"}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </motion.div>
         ))}
       </div>

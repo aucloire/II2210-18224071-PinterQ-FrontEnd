@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import {
-  Plus, BookOpen, FileText, Copy, Loader2, Sparkles, ArrowRight, Trophy
+  Plus, BookOpen, FileText, Copy, Loader2, Sparkles, ArrowRight, Trophy, Eye
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -155,52 +156,54 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
 
   return (
     <div className="space-y-8">
-      {/* Join Class Button */}
-      <div className="flex justify-end">
-        <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-sm">
-              <Plus className="size-4 mr-1.5" /> Bergabung ke Kelas
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Bergabung ke Kelas</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3">
-              <Input
-                placeholder="Masukkan kode kelas"
-                value={joinCode}
-                onChange={e => setJoinCode(e.target.value.toUpperCase())}
-                onKeyDown={e => e.key === "Enter" && handleJoinClass()}
-              />
-              <Button onClick={handleJoinClass} disabled={!joinCode.trim() || joining} className="w-full">
-                {joining ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <ArrowRight className="size-4 mr-1.5" />}
-                Gabung Kelas
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
       {/* Tab Switcher */}
-      <div className="flex gap-2 p-1 glass-strong rounded-xl inline-flex">
-        <button
-          onClick={() => setActiveTab("class")}
-          className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
-            activeTab === "class" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Kelas Saya
-        </button>
-        <button
-          onClick={() => setActiveTab("self")}
-          className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
-            activeTab === "self" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Self-Study
-        </button>
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2 p-1 glass-strong rounded-xl inline-flex">
+          <button
+            onClick={() => setActiveTab("class")}
+            className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+              activeTab === "class" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Kelas Saya
+          </button>
+          <button
+            onClick={() => setActiveTab("self")}
+            className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+              activeTab === "self" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Self-Study
+          </button>
+        </div>
+
+        {/* Join class button only visible on Kelas Saya tab */}
+        {activeTab === "class" && (
+          <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary/90 text-sm ml-3">
+                <Plus className="size-4 mr-1.5" /> Bergabung ke Kelas
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Bergabung ke Kelas</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <Input
+                  placeholder="Masukkan kode kelas"
+                  value={joinCode}
+                  onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                  onKeyDown={e => e.key === "Enter" && handleJoinClass()}
+                />
+                <Button onClick={handleJoinClass} disabled={!joinCode.trim() || joining} className="w-full">
+                  {joining ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <ArrowRight className="size-4 mr-1.5" />}
+                  Gabung Kelas
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <AnimatePresence mode="wait">
@@ -224,19 +227,27 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
               </div>
             ) : (
               joinedClasses.map(cls => (
-                <Card key={cls.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-bold">{cls.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Kode: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-xs">{cls.classCode}</code>
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">{cls.memberCount} murid bergabung</p>
+                <Link
+                  key={cls.id}
+                  to="/class/$classId"
+                  params={{ classId: String(cls.id) }}
+                  className="block"
+                >
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-bold">{cls.name}</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Kode: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-xs">{cls.classCode}</code>
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{cls.memberCount} murid bergabung</p>
+                        </div>
+                        <Eye className="size-4 text-muted-foreground shrink-0" />
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))
             )}
           </motion.section>
@@ -293,21 +304,27 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {selfStudyCategories.map(cat => (
-                  <Card
+                  <Link
                     key={cat.id}
-                    className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => loadStudyContent(cat.id, "self")}
+                    to="/category/$categoryId"
+                    params={{ categoryId: String(cat.id) }}
+                    className="block"
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-sm">{cat.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">Klik untuk melihat materi</p>
+                    <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-sm">{cat.name}</h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">Klik untuk melihat detail</p>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-[10px]">Self-Study</Badge>
+                            <Eye className="size-3.5 text-muted-foreground" />
+                          </div>
                         </div>
-                        <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-[10px]">Self-Study</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             )}

@@ -15,6 +15,8 @@ import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClassDetailRouteImport } from './routes/class/-$classId'
+import { Route as CategoryDetailRouteImport } from './routes/category/-$categoryId'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -46,6 +48,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClassDetailRoute = ClassDetailRouteImport.update({
+  id: '/class/$classId',
+  path: '/class/$classId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoryDetailRoute = CategoryDetailRouteImport.update({
+  id: '/category/$categoryId',
+  path: '/category/$categoryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +66,8 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/class/$classId': typeof ClassDetailRoute
+  '/category/$categoryId': typeof CategoryDetailRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +76,8 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/class/$classId': typeof ClassDetailRoute
+  '/category/$categoryId': typeof CategoryDetailRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,12 +87,14 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/class/$classId': typeof ClassDetailRoute
+  '/category/$categoryId': typeof CategoryDetailRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/explore' | '/history' | '/login' | '/profile'
+  fullPaths: '/' | '/admin' | '/explore' | '/history' | '/login' | '/profile' | '/class/$classId' | '/category/$categoryId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/explore' | '/history' | '/login' | '/profile'
+  to: '/' | '/admin' | '/explore' | '/history' | '/login' | '/profile' | '/class/$classId' | '/category/$categoryId'
   id:
     | '__root__'
     | '/'
@@ -85,6 +103,8 @@ export interface FileRouteTypes {
     | '/history'
     | '/login'
     | '/profile'
+    | '/class/$classId'
+    | '/category/$categoryId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +114,8 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
+  ClassDetailRoute: typeof ClassDetailRoute
+  CategoryDetailRoute: typeof CategoryDetailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -140,6 +162,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/class/$classId': {
+      id: '/class/$classId'
+      path: '/class/$classId'
+      fullPath: '/class/$classId'
+      preLoaderRoute: typeof ClassDetailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/category/$categoryId': {
+      id: '/category/$categoryId'
+      path: '/category/$categoryId'
+      fullPath: '/category/$categoryId'
+      preLoaderRoute: typeof CategoryDetailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -150,6 +186,8 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
+  ClassDetailRoute: ClassDetailRoute,
+  CategoryDetailRoute: CategoryDetailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
