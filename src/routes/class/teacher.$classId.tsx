@@ -40,8 +40,7 @@ function TeacherClassDetailPage() {
 
   const [classData, setClassData] = useState<ClassItem | null>(null);
   const [members, setMembers] = useState<ClassMember[]>([]);
-  const [flashcards, setFlashcards] = useState<any[]>([]);
-  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [groupedMaterials, setGroupedMaterials] = useState<Record<number, { title: string; quizzes: any[]; flashcards: any[] }>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,8 +57,25 @@ function TeacherClassDetailPage() {
         ]);
 
         setMembers(Array.isArray(membersData) ? membersData : []);
-        setFlashcards(Array.isArray(flashcardsData) ? flashcardsData : []);
-        setQuizzes(Array.isArray(quizzesData) ? quizzesData : []);
+        
+        // Grouping logic
+        const groups: Record<number, { title: string; quizzes: any[]; flashcards: any[] }> = {};
+        
+        (Array.isArray(quizzesData) ? quizzesData : []).forEach((q: any) => {
+          const mId = q.material?.id;
+          if (!mId) return;
+          if (!groups[mId]) groups[mId] = { title: q.material.title, quizzes: [], flashcards: [] };
+          groups[mId].quizzes.push(q);
+        });
+
+        (Array.isArray(flashcardsData) ? flashcardsData : []).forEach((f: any) => {
+          const mId = f.material?.id;
+          if (!mId) return;
+          if (!groups[mId]) groups[mId] = { title: f.material.title, quizzes: [], flashcards: [] };
+          groups[mId].flashcards.push(f);
+        });
+
+        setGroupedMaterials(groups);
         
         const found = (Array.isArray(allClasses) ? allClasses : []).find((c: any) => c.id === classIdNum);
         setClassData(found || null);
@@ -100,7 +116,7 @@ function TeacherClassDetailPage() {
             <Loader2 className="size-8 animate-spin text-primary/30" />
           </div>
         ) : (
-          <div className="space-y-12">
+          <div className="space-y-16">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -113,9 +129,9 @@ function TeacherClassDetailPage() {
               </div>
             </motion.div>
 
-            {/* Section 1: Daftar Murid */}
+            {/* Section 1: Daftar Murid (Scrollable) */}
             <section>
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <UsersRound className="size-5 text-green-600" />
                 Daftar Murid
               </h2>
@@ -125,78 +141,88 @@ function TeacherClassDetailPage() {
                    <p className="text-xs text-muted-foreground italic">Belum ada murid yang bergabung di kelas ini.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {members.map(m => (
-                    <motion.div key={m.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                      className="bg-white/40 p-4 rounded-2xl border border-black/5 flex items-center gap-3">
-                      <div className="size-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-                        <Users className="size-5 text-muted-foreground/30" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm leading-none">{m.fullName || m.username}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1">@{m.username}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar space-y-3 p-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {members.map(m => (
+                      <motion.div key={m.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white/40 p-4 rounded-2xl border border-black/5 flex items-center gap-3">
+                        <div className="size-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                          <Users className="size-5 text-muted-foreground/30" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm leading-none">{m.fullName || m.username}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">@{m.username}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               )}
             </section>
 
-            {/* Section 2: List Kuis */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
+            {/* Section 2: Materi & Kuis Grouped */}
+            <section className="space-y-12">
+              <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <ClipboardCheck className="size-5 text-blue-600" />
-                  Daftar Kuis
+                  Materi & Kuis
                 </h2>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700 font-bold">{quizzes.length} Kuis</Badge>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 font-bold">{Object.keys(groupedMaterials).length} Materi</Badge>
               </div>
-              {quizzes.length === 0 ? (
+
+              {Object.keys(groupedMaterials).length === 0 ? (
                 <div className="text-center py-12 glass rounded-3xl border border-dashed">
                    <ClipboardCheck className="size-10 mx-auto text-muted-foreground/10 mb-3" />
-                   <p className="text-xs text-muted-foreground italic">Belum ada kuis yang di-generate untuk kelas ini.</p>
+                   <p className="text-xs text-muted-foreground italic">Belum ada materi atau kuis untuk kelas ini.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {quizzes.map((q, i) => (
-                    <Card key={q.id} className="border-0 shadow-soft bg-white/60 overflow-hidden group">
-                      <CardContent className="p-5">
-                        <div className="flex items-start justify-between gap-4">
-                           <div className="size-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                              <span className="font-black text-xs">Q{i+1}</span>
-                           </div>
-                           <div className="flex-1">
-                              <p className="text-sm font-bold leading-snug line-clamp-2">{q.question}</p>
-                              <div className="flex items-center gap-3 mt-3">
-                                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Pilihan Ganda</span>
-                                 <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-50 px-2 py-0.5 rounded">Jawaban: {q.correctAnswer}</span>
-                              </div>
-                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </section>
+                <div className="space-y-10">
+                  {Object.entries(groupedMaterials).map(([mId, data]) => (
+                    <div key={mId} className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="h-px flex-1 bg-black/5"></div>
+                        <h3 className="font-black text-sm uppercase tracking-[0.2em] text-muted-foreground shrink-0">{data.title}</h3>
+                        <div className="h-px flex-1 bg-black/5"></div>
+                      </div>
 
-            {/* Section 3: List Flashcard */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <FileText className="size-5 text-purple-600" />
-                  Flashcard
-                </h2>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-700 font-bold">{flashcards.length} Kartu</Badge>
-              </div>
-              {flashcards.length === 0 ? (
-                <div className="text-center py-12 glass rounded-3xl border border-dashed">
-                   <FileText className="size-10 mx-auto text-muted-foreground/10 mb-3" />
-                   <p className="text-xs text-muted-foreground italic">Belum ada flashcard untuk kelas ini.</p>
-                </div>
-              ) : (
-                <div className="bg-white/40 p-6 rounded-[32px] border border-black/5 shadow-soft">
-                  <FlashcardCarousel cards={flashcards} />
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* Quizzes for this material */}
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-black uppercase tracking-widest text-blue-600/60 flex items-center gap-2 px-1">
+                            <ClipboardCheck className="size-3.5" /> Kuis ({data.quizzes.length})
+                          </h4>
+                          <div className="grid gap-3">
+                            {data.quizzes.map((q, i) => (
+                              <Card key={q.id} className="border-0 shadow-soft bg-white/60 overflow-hidden">
+                                <CardContent className="p-4">
+                                  <div className="flex items-start gap-3">
+                                    <div className="size-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 text-[10px] font-black">
+                                      {i + 1}
+                                    </div>
+                                    <p className="text-xs font-bold leading-relaxed line-clamp-2">{q.question}</p>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Flashcards for this material */}
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-black uppercase tracking-widest text-purple-600/60 flex items-center gap-2 px-1">
+                            <FileText className="size-3.5" /> Flashcard ({data.flashcards.length})
+                          </h4>
+                          {data.flashcards.length > 0 ? (
+                            <div className="bg-white/40 p-4 rounded-3xl border border-black/5">
+                              <FlashcardCarousel cards={data.flashcards} />
+                            </div>
+                          ) : (
+                            <p className="text-[10px] text-muted-foreground italic px-1">Tidak ada flashcard untuk materi ini.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </section>

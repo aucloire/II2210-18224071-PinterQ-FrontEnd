@@ -1,0 +1,116 @@
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, FileText, Loader2, BookOpen, Sparkles } from "lucide-react";
+import { getStoredUser, useAuth } from "@/lib/auth";
+import { api } from "@/lib/api";
+import { FlashcardCarousel } from "@/components/study";
+import { z } from "zod";
+
+const studySearchSchema = z.object({
+  categoryId: z.number().optional(),
+});
+
+export const Route = createFileRoute("/study/flashcard/$id")({
+  validateSearch: studySearchSchema,
+  component: StudyFlashcardPage,
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && !getStoredUser()) {
+      throw redirect({ to: "/login" });
+    }
+  },
+});
+
+function StudyFlashcardPage() {
+  const { user, ready } = useAuth();
+  const { id } = Route.useParams();
+  const { categoryId } = Route.useSearch();
+  const materialId = Number(id);
+
+  const [cards, setCards] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [materialTitle, setMaterialTitle] = useState("");
+
+  useEffect(() => {
+    if (!ready || !user || isNaN(materialId)) return;
+    setLoading(true);
+
+    const loadCards = async () => {
+      try {
+        if (categoryId) {
+          const raw = await api.getFlashcards(categoryId);
+          const filtered = (Array.isArray(raw) ? raw : []).filter((f: any) => f.material?.id === materialId);
+          
+          if (filtered.length > 0) {
+            setMaterialTitle(filtered[0].material.title);
+          }
+          setCards(filtered);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCards();
+  }, [materialId, categoryId, ready, user]);
+
+  if (!ready || !user) return null;
+
+  return (
+    <main className="min-h-screen w-full px-5 sm:px-10 pb-20">
+      <header className="max-w-3xl mx-auto pt-8 flex items-center justify-between">
+        <button 
+          onClick={() => window.history.back()}
+          className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all"
+        >
+          <div className="size-8 rounded-full glass flex items-center justify-center shadow-soft">
+            <ChevronLeft className="size-3.5" />
+          </div>
+          Kembali
+        </button>
+        <div className="flex items-center gap-2.5">
+          <div className="size-8 rounded-2xl bg-purple-500 flex items-center justify-center shadow-soft text-white">
+            <FileText className="size-4" />
+          </div>
+          <span className="font-bold tracking-tight text-foreground text-sm">
+            Flashcard Materi
+          </span>
+        </div>
+      </header>
+
+      <section className="max-w-3xl mx-auto pt-12">
+        {loading ? (
+          <div className="flex justify-center py-24">
+            <Loader2 className="size-8 animate-spin text-primary/30" />
+          </div>
+        ) : cards.length === 0 ? (
+          <div className="text-center py-20 glass rounded-[32px] border border-dashed border-border/50">
+            <FileText className="size-12 mx-auto text-muted-foreground/10 mb-4" />
+            <h3 className="text-sm font-bold text-muted-foreground/30 italic">Tidak ada flashcard ditemukan untuk materi ini.</h3>
+          </div>
+        ) : (
+          <div className="space-y-10">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">{materialTitle}</h1>
+              <p className="text-xs text-muted-foreground mt-2 font-black uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="size-3.5 text-primary" /> {cards.length} Kartu Belajar
+              </p>
+            </motion.div>
+
+            <div className="bg-white/40 p-6 sm:p-10 rounded-[40px] border border-black/5 shadow-soft">
+              <FlashcardCarousel cards={cards} />
+            </div>
+            
+            <div className="flex justify-center pt-4">
+               <Button onClick={() => window.history.back()} className="h-12 px-10 rounded-2xl font-black bg-primary text-white shadow-soft hover:brightness-105 transition">
+                  Selesai Belajar
+               </Button>
+            </div>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}

@@ -61,18 +61,6 @@ function Dashboard() {
             <span className="hidden sm:inline">Profil</span>
           </Link>
 
-          <Link to="/history" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft">
-            <History className="size-3.5" />
-            <span className="hidden sm:inline">Riwayat</span>
-          </Link>
-
-          {normalizedRole(user.role) === "MURID" && (
-            <Link to="/explore" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft text-primary">
-              <Layers className="size-3.5" />
-              <span className="hidden sm:inline">Jelajahi</span>
-            </Link>
-          )}
-
           <button
             onClick={() => { logout(); navigate({ to: "/login" }); }}
             className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-destructive/5 hover:text-destructive transition shadow-soft"

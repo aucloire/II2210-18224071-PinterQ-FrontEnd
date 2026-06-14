@@ -48,13 +48,6 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
 
   // Active study selection
   const [activeTab, setActiveTab] = useState<"class" | "self">("class");
-  const [activeItemId, setActiveItemId] = useState<number | null>(null);
-  const [studyItemType, setStudyItemType] = useState<"class" | "self" | null>(null);
-
-  // Study content
-  const [flashcards, setFlashcards] = useState<FlashcardItem[]>([]);
-  const [quizzes, setQuizzes] = useState<QuizQuestion[]>([]);
-  const [loadingStudy, setLoadingStudy] = useState(false);
 
   // Join class modal
   const [joinOpen, setJoinOpen] = useState(false);
@@ -125,32 +118,6 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
       alert("Gagal membuat kategori self-study");
     } finally {
       setCreating(false);
-    }
-  };
-
-  const loadStudyContent = async (itemId: number, type: "class" | "self") => {
-    setLoadingStudy(true);
-    setActiveItemId(itemId);
-    setStudyItemType(type);
-    try {
-      const [rawCards, rawQuizzes] = await Promise.all([
-        api.getFlashcards(itemId),
-        api.getQuizzes(itemId),
-      ]);
-      setFlashcards(rawCards);
-      const mappedQuizzes: QuizQuestion[] = rawQuizzes.map((q: any) => ({
-        id: q.id,
-        question: q.question,
-        options: [q.optionA, q.optionB, q.optionC, q.optionD],
-        correctIndex: ["A", "B", "C", "D"].indexOf(q.correctAnswer),
-        explanation: q.explanation,
-        materialId: q.material?.id,
-      }));
-      setQuizzes(mappedQuizzes);
-    } catch (err) {
-      console.error("Failed to load study content:", err);
-    } finally {
-      setLoadingStudy(false);
     }
   };
 
@@ -333,55 +300,6 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
           </motion.section>
         )}
       </AnimatePresence>
-
-      {/* Study Content Area */}
-      {(activeItemId !== null && studyItemType !== null) && (
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="pt-4 border-t"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">
-              {studyItemType === "class" ? "Kelas" : "Self-Study"} — Materi
-            </h3>
-            <Button variant="ghost" size="sm" onClick={() => { setActiveItemId(null); setStudyItemType(null); }}
-              className="text-muted-foreground text-xs">
-              Tutup
-            </Button>
-          </div>
-
-          {loadingStudy ? (
-            <div className="flex justify-center py-16"><Loader2 className="size-7 animate-spin text-primary/30" /></div>
-          ) : (
-            <div className="space-y-6">
-              {/* Flashcards */}
-              <div>
-                <h4 className="text-sm font-bold text-muted-foreground mb-2 flex items-center gap-1.5">
-                  <FileText className="size-4" /> Flashcard
-                </h4>
-                {flashcards.length > 0 ? (
-                  <FlashcardCarousel cards={flashcards} />
-                ) : (
-                  <p className="text-xs text-muted-foreground italic py-4 glass rounded-xl text-center">Belum ada flashcard di sini</p>
-                )}
-              </div>
-
-              {/* Quizzes */}
-              <div>
-                <h4 className="text-sm font-bold text-muted-foreground mb-2 flex items-center gap-1.5">
-                  <Trophy className="size-4" /> Kuis
-                </h4>
-                {quizzes.length > 0 ? (
-                  <QuizRunner questions={quizzes} onGenerateAdaptive={() => {}} onComplete={() => {}} />
-                ) : (
-                  <p className="text-xs text-muted-foreground italic py-4 glass rounded-xl text-center">Belum ada kuis di sini</p>
-                )}
-              </div>
-            </div>
-          )}
-        </motion.section>
-      )}
     </div>
   );
 }

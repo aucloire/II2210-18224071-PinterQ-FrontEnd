@@ -1,13 +1,13 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, FileText, ClipboardCheck, Loader2, BookOpen, Trophy, History, Sparkles, Eye, RotateCcw } from "lucide-react";
+import { ChevronLeft, FileText, ClipboardCheck, Loader2, BookOpen, Trophy, History, Sparkles, Award, RotateCcw } from "lucide-react";
 import { getStoredUser, useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FlashcardCarousel, QuizRunner } from "@/components/study";
+import { FlashcardCarousel } from "@/components/study";
 import type { QuizQuestion } from "@/components/study";
 
 export const Route = createFileRoute("/category/$categoryId")({
@@ -38,112 +38,74 @@ function CategoryDetailPage() {
   const catIdNum = Number(categoryId);
 
   const [category, setCategory] = useState<CategoryItem | null>(null);
-  const [flashcards, setFlashcards] = useState<any[]>([]);
-  const [quizzes, setQuizzes] = useState<QuizQuestion[]>([]);
+  const [groupedMaterials, setGroupedMaterials] = useState<Record<number, { title: string; quizzes: any[]; flashcards: any[] }>>({});
   const [history, setHistory] = useState<QuizHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "quizzes" | "flashcards" | "history">("overview");
-  const [activeQuizIndex, setActiveQuizIndex] = useState<number | null>(null);
-  const [studyKey, setStudyKey] = useState(0);
+  const [activeTab, setActiveTab] = useState<"overview" | "study" | "history">("overview");
 
   useEffect(() => {
     if (!ready || !user || isNaN(catIdNum)) return;
     setLoading(true);
     const studentId = Number(user.userId);
 
-    const loadCategory = async () => {
+    const fetchData = async () => {
       try {
-        const all = await api.getCategories(studentId);
-        const found = (Array.isArray(all) ? all : []).find((c: any) => c.id === catIdNum);
+        const [allCats, flashcardsData, quizzesData, historyData] = await Promise.all([
+          api.getCategories(studentId),
+          api.getFlashcards(catIdNum),
+          api.getQuizzes(catIdNum),
+          api.getQuizHistory(studentId)
+        ]);
+
+        const found = (Array.isArray(allCats) ? allCats : []).find((c: any) => c.id === catIdNum);
         setCategory(found || null);
-      } catch { setCategory(null); }
+
+        // Grouping logic
+        const groups: Record<number, { title: string; quizzes: any[]; flashcards: any[] }> = {};
+        
+        const mappedQuizzes: QuizQuestion[] = (Array.isArray(quizzesData) ? quizzesData : []).map((q: any) => {
+          const mId = q.material?.id;
+          if (mId) {
+            if (!groups[mId]) groups[mId] = { title: q.material.title, quizzes: [], flashcards: [] };
+            groups[mId].quizzes.push(q);
+          }
+          return {
+            id: q.id,
+            question: q.question,
+            options: [q.optionA, q.optionB, q.optionC, q.optionD],
+            correctIndex: ["A", "B", "C", "D"].indexOf(q.correctAnswer),
+            explanation: q.explanation,
+            materialId: q.material?.id,
+          };
+        });
+
+        (Array.isArray(flashcardsData) ? flashcardsData : []).forEach((f: any) => {
+          const mId = f.material?.id;
+          if (!mId) return;
+          if (!groups[mId]) groups[mId] = { title: f.material.title, quizzes: [], flashcards: [] };
+          groups[mId].flashcards.push(f);
+        });
+
+        setGroupedMaterials(groups);
+
+        const materialIds = new Set(mappedQuizzes.map(q => q.materialId).filter(Boolean));
+        setHistory((Array.isArray(historyData) ? historyData : []).filter((h: any) => materialIds.has(h.materialId)));
+
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const loadFlashcards = async () => {
-      try {
-        const data = await api.getFlashcards(catIdNum);
-        setFlashcards(Array.isArray(data) ? data : []);
-      } catch { setFlashcards([]); }
-    };
-
-    const loadQuizzes = async () => {
-      try {
-        const raw = await api.getQuizzes(catIdNum);
-        const mapped: QuizQuestion[] = (Array.isArray(raw) ? raw : []).map((q: any) => ({
-          id: q.id,
-          question: q.question,
-          options: [q.optionA, q.optionB, q.optionC, q.optionD],
-          correctIndex: ["A", "B", "C", "D"].indexOf(q.correctAnswer),
-          explanation: q.explanation,
-          materialId: q.material?.id,
-        }));
-        setQuizzes(mapped);
-      } catch { setQuizzes([]); }
-    };
-
-    const loadHistory = async () => {
-      try {
-        const data = await api.getQuizHistory(studentId);
-        // Filter: only history for this category's materials
-        const materialIds = new Set(quizzes.map(q => q.materialId).filter(Boolean));
-        const filtered = (Array.isArray(data) ? data : []).filter((h: any) =>
-          materialIds.has(h.materialId)
-        );
-        setHistory(filtered);
-      } catch { setHistory([]); }
-    };
-
-    Promise.all([loadCategory(), loadFlashcards(), loadQuizzes()])
-      .then(() => loadHistory())
-      .finally(() => setLoading(false));
+    fetchData();
   }, [catIdNum, ready, user]);
-
-  // Reload history when quizzes change (new quiz loaded)
-  useEffect(() => {
-    if (!user || history.length === 0) return;
-    const studentId = Number(user.userId);
-    api.getQuizHistory(studentId)
-      .then((data) => {
-        const materialIds = new Set(quizzes.map(q => q.materialId).filter(Boolean));
-        const filtered = (Array.isArray(data) ? data : []).filter((h: any) =>
-          materialIds.has(h.materialId)
-        );
-        setHistory(filtered);
-      })
-      .catch(() => {});
-  }, [quizzes]);
-
-  const handleQuizComplete = async (score: number) => {
-    if (!user || activeQuizIndex === null) return;
-    const q = quizzes[activeQuizIndex];
-    if (!q?.materialId) return;
-    try {
-      await api.submitQuizAttempt(Number(user.userId), q.materialId, score);
-      setStudyKey(k => k + 1); // refresh history
-    } catch (err) {
-      console.error("Gagal simpan skor:", err);
-    }
-  };
 
   const onGenerateAdaptive = async (difficulty: "HOTS" | "DASAR") => {
     if (!category) return;
     try {
       await api.generateAdaptive(catIdNum, difficulty);
-      // Reload flashcards and quizzes after generation
-      const [rawCards, rawQuizzes] = await Promise.all([
-        api.getFlashcards(catIdNum),
-        api.getQuizzes(catIdNum),
-      ]);
-      setFlashcards(rawCards);
-      const mapped: QuizQuestion[] = (Array.isArray(rawQuizzes) ? rawQuizzes : []).map((q: any) => ({
-        id: q.id,
-        question: q.question,
-        options: [q.optionA, q.optionB, q.optionC, q.optionD],
-        correctIndex: ["A", "B", "C", "D"].indexOf(q.correctAnswer),
-        explanation: q.explanation,
-        materialId: q.material?.id,
-      }));
-      setQuizzes(mapped);
+      window.location.reload();
     } catch (err) {
       alert("Gagal generate kuis adaptif");
     }
@@ -165,7 +127,7 @@ function CategoryDetailPage() {
             <BookOpen className="size-4" />
           </div>
           <span className="font-bold tracking-tight text-foreground text-sm">
-            {category?.name || "Detail Kategori"}
+            {category?.name || "Self-Study"}
           </span>
         </div>
       </header>
@@ -179,23 +141,22 @@ function CategoryDetailPage() {
           <>
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{category?.name || `Kategori #${catIdNum}`}</h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2 font-medium">
                 <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-[10px]">Self-Study</Badge>
               </p>
             </motion.div>
 
             {/* Tab Switcher */}
-            <div className="flex gap-2 p-1 glass-strong rounded-xl inline-flex mt-8 flex-wrap">
+            <div className="flex gap-2 p-1 glass-strong rounded-xl inline-flex mt-10 flex-wrap">
               {([
                 { key: "overview", label: "Overview" },
-                { key: "quizzes", label: "Kuis" },
-                { key: "flashcards", label: "Flashcard" },
-                { key: "history", label: "Riwayat" },
+                { key: "study", label: "Materi & Belajar" },
+                { key: "history", label: "Riwayat Skor" },
               ] as const).map(({ key, label }) => (
                 <button
                   key={key}
-                  onClick={() => { setActiveTab(key); setActiveQuizIndex(null); }}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                  onClick={() => setActiveTab(key)}
+                  className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${
                     activeTab === key ? "bg-primary text-white shadow-soft" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -208,190 +169,145 @@ function CategoryDetailPage() {
       </section>
 
       <section className="max-w-6xl mx-auto pb-10">
-        {/* === OVERVIEW === */}
         {activeTab === "overview" && !loading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatCard title="Total Kuis" value={quizzes.length} icon={<ClipboardCheck className="size-5" />} color="text-blue-600 bg-blue-50" />
-              <StatCard title="Flashcard" value={flashcards.length} icon={<FileText className="size-5" />} color="text-purple-600 bg-purple-50" />
-              <StatCard title="Riwayat Pengerjaan" value={history.length} icon={<History className="size-5" />} color="text-green-600 bg-green-50" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <StatCard title="Materi" value={Object.keys(groupedMaterials).length} icon={<BookOpen className="size-5" />} color="text-blue-600 bg-blue-50" />
+              <StatCard title="Riwayat" value={history.length} icon={<History className="size-5" />} color="text-green-600 bg-green-50" />
+              <div className="glass-strong rounded-2xl p-5 border border-primary/20 flex flex-col justify-center">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Target Berikutnya</p>
+                 <Button onClick={() => onGenerateAdaptive("HOTS")} size="sm" className="bg-primary hover:bg-primary/90 text-white text-[10px] font-black uppercase">Generate HOTS</Button>
+              </div>
             </div>
 
-            {/* Quick Kuis Preview */}
-            {quizzes.length > 0 && (
-              <div>
-                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                  <ClipboardCheck className="size-5 text-blue-600" /> Kuis Terbaru
+            {/* Recent History */}
+            {history.length > 0 && (
+              <section>
+                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <History className="size-5 text-green-600" /> Skor Terakhir
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {quizzes.slice(0, 4).map((q, i) => (
-                    <Card key={q.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setActiveTab("quizzes"); setActiveQuizIndex(i); }}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-bold text-sm">Kuis {i + 1}</h3>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{q.question}</p>
-                          </div>
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px]">Kuis</Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
+                <div className="space-y-3">
+                  {history.slice(0, 3).map((h, i) => (
+                    <div key={i} className="bg-white/40 p-4 rounded-2xl border border-black/5 flex items-center justify-between">
+                       <span className="font-bold text-sm">Percobaan #{history.length - i}</span>
+                       <span className="text-xl font-black text-primary">{Math.round(h.score)}%</span>
+                    </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Quick Flashcard Preview */}
-            {flashcards.length > 0 && (
-              <div>
-                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                  <FileText className="size-5 text-purple-600" /> Flashcard
-                </h2>
-                <Card className="border-0 shadow-sm">
-                  <CardContent className="p-4">
-                    <FlashcardCarousel cards={flashcards} />
-                  </CardContent>
-                </Card>
-              </div>
+              </section>
             )}
           </motion.div>
         )}
 
-        {/* === QUIZZES === */}
-        {activeTab === "quizzes" && !loading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            {quizzes.length === 0 ? (
-              <p className="text-xs text-muted-foreground italic py-8 glass rounded-xl text-center">Belum ada kuis di kategori ini</p>
+        {activeTab === "study" && !loading && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-16">
+            {Object.keys(groupedMaterials).length === 0 ? (
+              <p className="text-xs text-muted-foreground italic py-12 glass rounded-2xl text-center">Belum ada materi untuk kategori ini</p>
             ) : (
-              <div className="space-y-3">
-                {quizzes.map((q, i) => (
-                  <Card key={q.id} className="border-0 shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-sm">Kuis {i + 1}</h3>
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-[10px]">
-                              HOTS
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{q.question}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={() => setActiveQuizIndex(i)} className="bg-primary hover:bg-primary/90 text-xs">
-                            <Eye className="size-3.5 mr-1" /> Kerjakan
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            {/* Active Quiz Runner */}
-            {activeQuizIndex !== null && quizzes[activeQuizIndex] && (
-              <div className="pt-6 border-t space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-lg">Kuis {activeQuizIndex + 1}</h3>
-                  <Button variant="ghost" size="sm" onClick={() => { setActiveQuizIndex(null); }} className="text-muted-foreground text-xs">
-                    Tutup
-                  </Button>
-                </div>
-                <QuizRunner
-                  questions={[quizzes[activeQuizIndex]]}
-                  onGenerateAdaptive={onGenerateAdaptive}
-                  onComplete={handleQuizComplete}
-                />
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* === FLASHCARDS === */}
-        {activeTab === "flashcards" && !loading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <FileText className="size-5 text-purple-600" /> Flashcard
-              </h2>
-              <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-[10px]">{flashcards.length} kartu</Badge>
-            </div>
-            {flashcards.length > 0 ? (
-              <FlashcardCarousel cards={flashcards} />
-            ) : (
-              <p className="text-xs text-muted-foreground italic py-8 glass rounded-xl text-center">Belum ada flashcard di kategori ini</p>
-            )}
-          </motion.div>
-        )}
-
-        {/* === HISTORY === */}
-        {activeTab === "history" && !loading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <History className="size-5 text-green-600" /> Riwayat Pengerjaan
-              </h2>
-              <Badge variant="secondary" className="bg-green-100 text-green-700 text-[10px]">{history.length} upaya</Badge>
-            </div>
-
-            {history.length === 0 ? (
-              <p className="text-xs text-muted-foreground italic py-8 glass rounded-xl text-center">Belum ada riwayat pengerjaan</p>
-            ) : (
-              <div className="space-y-2">
-                {history.map((h: any, idx: number) => (
-                  <div key={h.id || idx} className="bg-white/60 p-4 rounded-2xl border border-black/5 flex items-center justify-between">
+              <div className="space-y-14">
+                {Object.entries(groupedMaterials).map(([mId, data]) => (
+                  <div key={mId} className="space-y-8">
                     <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-xl bg-secondary flex items-center justify-center">
-                        <History className="size-5 text-muted-foreground/30" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm">
-                          Kuis #{history.indexOf(h) + 1}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(h.createdAt).toLocaleString("id-ID", {
-                            day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
+                      <div className="h-px flex-1 bg-black/5"></div>
+                      <h3 className="font-black text-xs uppercase tracking-[0.2em] text-muted-foreground shrink-0">{data.title}</h3>
+                      <div className="h-px flex-1 bg-black/5"></div>
                     </div>
-                    <div className={`text-2xl font-black ${
-                      h.score >= 80 ? "text-green-600" : h.score >= 50 ? "text-amber-600" : "text-red-500"
-                    }`}>
-                      {h.score}
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                      <div className="space-y-5">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-blue-600/60 flex items-center gap-2 px-1">
+                          <ClipboardCheck className="size-3.5" /> Kuis
+                        </h4>
+                        <div className="grid gap-3">
+                          {data.quizzes.map((q, i) => (
+                            <Card key={q.id} className="border-0 shadow-soft bg-white/60 group hover:bg-white/80 transition-all">
+                              <CardContent className="p-4">
+                                <div className="flex items-center justify-between gap-4">
+                                   <div className="flex items-start gap-3 flex-1">
+                                      <div className="size-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 text-[10px] font-black">
+                                        Q{i + 1}
+                                      </div>
+                                      <p className="text-xs font-bold leading-relaxed line-clamp-2">{q.question}</p>
+                                   </div>
+                                   <Link
+                                      to="/study/quiz/$id"
+                                      params={{ id: String(mId) }}
+                                      search={{ categoryId: catIdNum }}
+                                      className="inline-flex items-center justify-center px-4 h-8 rounded-lg bg-primary text-white font-black text-[9px] uppercase tracking-widest shadow-soft opacity-0 group-hover:opacity-100 transition-opacity"
+                                   >
+                                      Kerjakan
+                                   </Link>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-5">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-purple-600/60 flex items-center gap-2 px-1">
+                          <FileText className="size-3.5" /> Flashcard
+                        </h4>
+                        {data.flashcards.length > 0 ? (
+                          <div className="bg-white/40 p-6 rounded-[32px] border border-black/5 shadow-soft flex flex-col items-center justify-center text-center gap-4">
+                             <div className="size-16 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600">
+                                <FileText className="size-8" />
+                             </div>
+                             <div>
+                                <p className="font-bold text-sm">Flashcard Belajar</p>
+                                <p className="text-[10px] text-muted-foreground mt-1">{data.flashcards.length} kartu tersedia</p>
+                             </div>
+                             <Link
+                                to="/study/flashcard/$id"
+                                params={{ id: String(mId) }}
+                                search={{ categoryId: catIdNum }}
+                                className="mt-2 inline-flex items-center justify-center px-6 h-9 rounded-xl bg-purple-600 text-white font-black text-[10px] uppercase tracking-widest shadow-soft hover:brightness-110 transition"
+                             >
+                                Buka Flashcard
+                             </Link>
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-muted-foreground italic px-1">Tidak ada flashcard.</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+          </motion.div>
+        )}
 
-            {/* HOTS Section */}
-            <div className="glass-strong rounded-2xl p-6 border border-border/50">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="size-5 text-amber-500" />
-                <h3 className="font-bold">Latihan Adaptif (HOTS / DASAR)</h3>
-              </div>
-              <p className="text-xs text-muted-foreground mb-4">
-                Dapatkan kuis dengan tingkat kesulitan yang disesuaikan berdasarkan hasil kuis terakhir kamu.
-              </p>
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  onClick={() => onGenerateAdaptive("HOTS")}
-                  className="text-sm"
-                  style={{ backgroundColor: "var(--color-blush)" }}
-                >
-                  <Sparkles className="size-4 mr-1.5" /> Generate Level Analisis (HOTS)
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => onGenerateAdaptive("DASAR")}
-                  style={{ borderColor: "var(--color-sage)", color: "var(--color-oak)" }}
-                >
-                  <RotateCcw className="size-4 mr-1.5" /> Generate Konsep Dasar
-                </Button>
-              </div>
-            </div>
+        {activeTab === "history" && !loading && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+             <div className="flex items-center justify-between mb-4">
+               <h2 className="text-xl font-bold flex items-center gap-2">
+                 <History className="size-6 text-green-600" /> Riwayat Lengkap
+               </h2>
+               <Badge className="bg-green-100 text-green-700 font-bold">{history.length} Upaya</Badge>
+             </div>
+             {history.length === 0 ? (
+               <p className="text-sm text-muted-foreground italic py-12 text-center">Belum ada riwayat pengerjaan.</p>
+             ) : (
+               <div className="grid gap-4">
+                 {history.map((h, i) => (
+                   <div key={i} className="bg-white/50 p-6 rounded-3xl border border-black/5 flex items-center justify-between shadow-soft">
+                      <div className="flex items-center gap-4">
+                         <div className="size-12 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                            <Award className="size-6 text-primary/40" />
+                         </div>
+                         <div>
+                            <p className="font-bold text-base">Percobaan #{history.length - i}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                               {new Date(h.createdAt).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                         </div>
+                      </div>
+                      <div className="text-4xl font-black text-primary">{Math.round(h.score)}%</div>
+                   </div>
+                 ))}
+               </div>
+             )}
           </motion.div>
         )}
       </section>
@@ -403,14 +319,14 @@ function StatCard({ title, value, icon, color }: {
   title: string; value: number | string; icon: React.ReactNode; color: string;
 }) {
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
       <CardContent className="p-5 flex items-center gap-4">
-        <div className={`size-12 rounded-2xl flex items-center justify-center ${color}`}>
+        <div className={`size-12 rounded-2xl flex items-center justify-center shadow-sm ${color}`}>
           {icon}
         </div>
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>
-          <p className="text-3xl font-black">{value}</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
+          <p className="text-3xl font-black tracking-tight">{value}</p>
         </div>
       </CardContent>
     </Card>
