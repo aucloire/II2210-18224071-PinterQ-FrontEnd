@@ -319,15 +319,15 @@ function TeacherClassDetailPage() {
                                  </div>
 
                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-5 rounded-3xl bg-blue-50/50 border border-blue-100 flex flex-col gap-1">
-                                       <ClipboardCheck className="size-5 text-blue-600 mb-2" />
-                                       <span className="text-2xl font-black text-blue-700">{data.quizzes.length}</span>
-                                       <span className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Kuis Tersedia</span>
+                                    <div className="p-5 rounded-3xl bg-background border border-primary/10 flex flex-col gap-1">
+                                       <ClipboardCheck className="size-5 text-primary mb-2" />
+                                       <span className="text-2xl font-black text-primary">{data.quizzes.length}</span>
+                                       <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">Kuis Tersedia</span>
                                     </div>
-                                    <div className="p-5 rounded-3xl bg-purple-50/50 border border-purple-100 flex flex-col gap-1">
-                                       <FileText className="size-5 text-purple-600 mb-2" />
-                                       <span className="text-2xl font-black text-purple-700">{data.flashcards.length}</span>
-                                       <span className="text-[10px] font-black uppercase tracking-widest text-purple-600/60">Kartu Hafalan</span>
+                                    <div className="p-5 rounded-3xl bg-background border border-sage/10 flex flex-col gap-1">
+                                       <FileText className="size-5 text-sage mb-2" />
+                                       <span className="text-2xl font-black text-sage">{data.flashcards.length}</span>
+                                       <span className="text-[10px] font-black uppercase tracking-widest text-sage/60">Kartu Hafalan</span>
                                     </div>
                                  </div>
                               </div>

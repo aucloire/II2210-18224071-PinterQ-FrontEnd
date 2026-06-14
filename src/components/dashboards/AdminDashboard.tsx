@@ -215,10 +215,10 @@ export function AdminDashboard() {
                           <span className="font-bold text-sm text-foreground">{u.fullName}</span>
                         )}
                         <span className="text-xs font-medium text-muted-foreground">@{u.username}</span>
-                        <Badge variant="secondary" className={`text-[9px] font-bold px-1.5 h-4 ${
-                          u.role === "SUPERADMIN" ? "bg-purple-100 text-purple-700" :
-                          u.role === "GURU" ? "bg-blue-100 text-blue-700" :
-                          "bg-green-100 text-green-700"
+                        <Badge variant="secondary" className={`text-[9px] font-bold px-1.5 h-4 border-0 ${
+                          u.role === "SUPERADMIN" ? "bg-indigo-50 text-indigo-400/80" :
+                          u.role === "GURU" ? "bg-slate-100 text-slate-500" :
+                          "bg-sage/10 text-sage/70"
                         }`}>
                           {u.role}
                         </Badge>

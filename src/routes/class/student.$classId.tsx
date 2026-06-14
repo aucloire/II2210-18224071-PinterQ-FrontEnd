@@ -176,7 +176,7 @@ function StudentClassDetailPage() {
                            <div className="p-8 sm:p-10 flex flex-col md:flex-row gap-10 items-center">
                               {/* Icon & Progress */}
                               <div className="shrink-0 relative">
-                                 <div className={`size-24 rounded-[32px] flex items-center justify-center shadow-soft ${data.bestScore ? 'bg-sage/10 text-sage' : 'bg-primary/5 text-primary/30'}`}>
+                                 <div className={`size-24 rounded-[32px] flex items-center justify-center shadow-soft ${data.bestScore ? 'bg-background text-sage' : 'bg-background text-primary/30'}`}>
                                     {data.bestScore ? <CheckCircle2 className="size-10" /> : <Circle className="size-10 opacity-20" />}
                                  </div>
                                  {data.bestScore && (

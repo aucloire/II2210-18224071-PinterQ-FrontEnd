@@ -77,7 +77,7 @@ function StudyFlashcardPage() {
           Kembali
         </button>
         <div className="flex items-center gap-2.5">
-          <div className="size-8 rounded-2xl bg-purple-500 flex items-center justify-center shadow-soft text-white">
+          <div className="size-8 rounded-2xl bg-indigo-400/20 flex items-center justify-center shadow-soft text-indigo-500">
             <FileText className="size-4" />
           </div>
           <span className="font-bold tracking-tight text-foreground text-sm">
@@ -105,7 +105,7 @@ function StudyFlashcardPage() {
               </p>
             </motion.div>
 
-            <div className="bg-rose/5 p-6 sm:p-10 rounded-[40px] border border-rose/10 shadow-soft">
+            <div className="bg-background p-6 sm:p-10 rounded-[40px] border border-rose/10 shadow-soft">
               <FlashcardCarousel cards={cards} />
             </div>
             

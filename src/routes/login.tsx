@@ -41,26 +41,26 @@ function Login() {
     setErrorMsg("");
 
     try {
-      let data;
       if (mode === "login") {
-        const data = await api.login(username, password);
+        const loginData = await api.login(username, password);
         // Fetch profile to ensure fullName is populated correctly
-        let fullName = data.fullName || data.username;
+        let fullNameToStore = loginData.fullName || loginData.username;
         try {
-          const profile = await api.getProfile(Number(data.userId));
-          if (profile.fullName) fullName = profile.fullName;
+          const profile = await api.getProfile(Number(loginData.userId));
+          if (profile.fullName) fullNameToStore = profile.fullName;
         } catch { /* fall back to login response */ }
+
         setStoredUser({
-          userId: String(data.userId),
-          username: data.username,
-          fullName,
-          role: data.role || "MURID",
-          profileImageUrl: data.profileImageUrl || "",
-          token: data.token || "",
+          userId: String(loginData.userId),
+          username: loginData.username,
+          fullName: fullNameToStore,
+          role: loginData.role || "MURID",
+          profileImageUrl: loginData.profileImageUrl || "",
+          token: loginData.token || "",
         });
         navigate({ to: "/" });
       } else {
-        data = await api.register(username, email, password, selectedRole);
+        await api.register(username, email, password, selectedRole);
         // No auto-login after register — show approval message
         setErrorMsg("Akun berhasil dibuat. Silakan tunggu persetujuan Superadmin, lalu login.");
       }

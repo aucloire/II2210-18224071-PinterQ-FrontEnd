@@ -131,9 +131,9 @@ function ProfilePage() {
         setStoredUser({
           ...stored,
           fullName: updated.fullName || updated.username || stripped,
+          username: stripped,
           profileImageUrl: updated.profileImageUrl || "",
         });
-        setStoredUser({ ...stored, username: stripped });
       }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
