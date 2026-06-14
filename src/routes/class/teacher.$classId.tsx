@@ -202,7 +202,7 @@ function TeacherClassDetailPage() {
           {/* Hero Section */}
           <section>
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <Badge className="bg-sage/10 text-sage border-0 font-black text-[10px] uppercase tracking-[0.2em] mb-4 px-3 py-1 rounded-full">
+              <Badge className="bg-sage/10 text-sage/80 border-0 font-black text-[10px] uppercase tracking-[0.2em] mb-4 px-3 py-1 rounded-full">
                 Detail Ruang Kelas
               </Badge>
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
@@ -211,10 +211,10 @@ function TeacherClassDetailPage() {
                   <div className="flex items-center gap-4 mt-4 text-muted-foreground font-bold">
                     <div className="flex items-center gap-1.5 px-3 py-1 bg-white rounded-full shadow-sm border border-black/5">
                        <span className="text-[10px] uppercase tracking-widest opacity-60">KODE:</span>
-                       <code className="text-primary font-mono text-sm">{classData?.classCode}</code>
+                       <code className="text-primary/80 font-mono text-sm">{classData?.classCode}</code>
                     </div>
                     <div className="flex items-center gap-1.5">
-                       <UsersRound className="size-4 text-sage" />
+                       <UsersRound className="size-4 text-sage/60" />
                        <span className="text-xs uppercase tracking-wider">{members.length} Murid</span>
                     </div>
                   </div>
@@ -226,7 +226,7 @@ function TeacherClassDetailPage() {
                        <Plus className="size-5" /> Tambah Topik Baru
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-xl rounded-[40px] glass-strong border-white/20 p-8">
+                  <DialogContent className="sm:max-w-xl rounded-[40px] bg-white border-white/20 p-8 shadow-xl">
                     <DialogHeader>
                       <DialogTitle className="text-3xl font-black tracking-tight">Buat Topik Baru</DialogTitle>
                       <DialogDescription className="text-base font-medium">Topik adalah wadah untuk Kuis dan Flashcard materi tertentu.</DialogDescription>
@@ -238,7 +238,7 @@ function TeacherClassDetailPage() {
                             placeholder="Contoh: Dasar-dasar Pemrograman" 
                             value={newTopicTitle} 
                             onChange={e => setNewTopicTopicTitle(e.target.value)}
-                            className="h-12 rounded-xl border-black/5 bg-white/50 font-bold"
+                            className="h-12 rounded-xl border-black/5 bg-gray-50 font-bold"
                           />
                        </div>
                        <div className="space-y-2">
@@ -247,7 +247,7 @@ function TeacherClassDetailPage() {
                             placeholder="Tuliskan penjelasan materi di sini..." 
                             value={newTopicContent} 
                             onChange={e => setNewTopicContent(e.target.value)}
-                            className="min-h-[150px] rounded-2xl border-black/5 bg-white/50 font-medium p-4"
+                            className="min-h-[150px] rounded-2xl border-black/5 bg-gray-50 font-medium p-4"
                           />
                        </div>
                        <div className="grid grid-cols-2 gap-4">
@@ -255,7 +255,7 @@ function TeacherClassDetailPage() {
                             variant="outline"
                             onClick={() => handleAddTopic(false)}
                             disabled={isCreatingTopic}
-                            className="h-12 rounded-xl border-sage/20 text-sage font-black uppercase tracking-widest"
+                            className="h-12 rounded-xl border-primary/20 text-primary font-black uppercase tracking-widest"
                           >
                              Manual Saja
                           </Button>
@@ -340,32 +340,32 @@ function TeacherClassDetailPage() {
                                           <Plus className="size-4 mr-2" /> Tambah Soal
                                        </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-2xl rounded-[40px] glass-strong p-8">
+                                    <DialogContent className="sm:max-w-2xl rounded-[40px] bg-white border-white/20 p-8 shadow-xl">
                                        <DialogHeader>
                                           <DialogTitle className="text-2xl font-black">Tambah Soal Kuis</DialogTitle>
-                                          <DialogDescription>Topik: {data.title}</DialogDescription>
+                                          <DialogDescription className="text-base font-medium">Topik: {data.title}</DialogDescription>
                                        </DialogHeader>
                                        <div className="space-y-4 pt-4">
                                           <div className="space-y-1">
-                                             <label className="text-[10px] font-black uppercase text-muted-foreground">Pertanyaan</label>
-                                             <Textarea value={quizForm.question} onChange={e => setQuizQuizForm({...quizForm, question: e.target.value})} className="rounded-xl" />
+                                             <label className="text-[10px] font-black uppercase text-muted-foreground px-1">Pertanyaan</label>
+                                             <Textarea value={quizForm.question} onChange={e => setQuizQuizForm({...quizForm, question: e.target.value})} className="rounded-xl border-black/5 bg-gray-50 font-medium" />
                                           </div>
                                           <div className="grid grid-cols-2 gap-4">
-                                             <Input placeholder="Opsi A" value={quizForm.optionA} onChange={e => setQuizQuizForm({...quizForm, optionA: e.target.value})} />
-                                             <Input placeholder="Opsi B" value={quizForm.optionB} onChange={e => setQuizQuizForm({...quizForm, optionB: e.target.value})} />
-                                             <Input placeholder="Opsi C" value={quizForm.optionC} onChange={e => setQuizQuizForm({...quizForm, optionC: e.target.value})} />
-                                             <Input placeholder="Opsi D" value={quizForm.optionD} onChange={e => setQuizQuizForm({...quizForm, optionD: e.target.value})} />
+                                             <Input placeholder="Opsi A" value={quizForm.optionA} onChange={e => setQuizQuizForm({...quizForm, optionA: e.target.value})} className="border-black/5 bg-gray-50" />
+                                             <Input placeholder="Opsi B" value={quizForm.optionB} onChange={e => setQuizQuizForm({...quizForm, optionB: e.target.value})} className="border-black/5 bg-gray-50" />
+                                             <Input placeholder="Opsi C" value={quizForm.optionC} onChange={e => setQuizQuizForm({...quizForm, optionC: e.target.value})} className="border-black/5 bg-gray-50" />
+                                             <Input placeholder="Opsi D" value={quizForm.optionD} onChange={e => setQuizQuizForm({...quizForm, optionD: e.target.value})} className="border-black/5 bg-gray-50" />
                                           </div>
                                           <div className="flex items-center gap-4">
-                                             <label className="text-[10px] font-black uppercase text-muted-foreground">Jawaban Benar:</label>
-                                             <select value={quizForm.correctAnswer} onChange={e => setQuizQuizForm({...quizForm, correctAnswer: e.target.value})} className="h-10 rounded-lg border px-3">
+                                             <label className="text-[10px] font-black uppercase text-muted-foreground px-1">Jawaban Benar:</label>
+                                             <select value={quizForm.correctAnswer} onChange={e => setQuizQuizForm({...quizForm, correctAnswer: e.target.value})} className="h-10 rounded-lg border border-black/5 bg-gray-50 px-3 text-sm font-bold">
                                                 <option value="A">A</option>
                                                 <option value="B">B</option>
                                                 <option value="C">C</option>
                                                 <option value="D">D</option>
                                              </select>
                                           </div>
-                                          <Button onClick={handleAddQuiz} className="w-full h-12 rounded-xl bg-primary font-black uppercase">Simpan Soal</Button>
+                                          <Button onClick={handleAddQuiz} className="w-full h-12 rounded-xl bg-primary text-white font-black uppercase tracking-widest shadow-soft">Simpan Soal</Button>
                                        </div>
                                     </DialogContent>
                                  </Dialog>
@@ -376,21 +376,21 @@ function TeacherClassDetailPage() {
                                           <Plus className="size-4 mr-2" /> Tambah Flashcard
                                        </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-xl rounded-[40px] glass-strong p-8">
+                                    <DialogContent className="sm:max-w-xl rounded-[40px] bg-white border-white/20 p-8 shadow-xl">
                                        <DialogHeader>
                                           <DialogTitle className="text-2xl font-black">Tambah Flashcard</DialogTitle>
-                                          <DialogDescription>Topik: {data.title}</DialogDescription>
+                                          <DialogDescription className="text-base font-medium">Topik: {data.title}</DialogDescription>
                                        </DialogHeader>
                                        <div className="space-y-4 pt-4">
                                           <div className="space-y-1">
-                                             <label className="text-[10px] font-black uppercase text-muted-foreground">Pertanyaan / Kata Kunci</label>
-                                             <Input value={cardForm.question} onChange={e => setCardForm({...cardForm, question: e.target.value})} className="h-12 rounded-xl" />
+                                             <label className="text-[10px] font-black uppercase text-muted-foreground px-1">Pertanyaan / Kata Kunci</label>
+                                             <Input value={cardForm.question} onChange={e => setCardForm({...cardForm, question: e.target.value})} className="h-12 rounded-xl border-black/5 bg-gray-50 font-bold" />
                                           </div>
                                           <div className="space-y-1">
-                                             <label className="text-[10px] font-black uppercase text-muted-foreground">Jawaban / Penjelasan Singkat</label>
-                                             <Textarea value={cardForm.answer} onChange={e => setCardForm({...cardForm, answer: e.target.value})} className="rounded-xl" />
+                                             <label className="text-[10px] font-black uppercase text-muted-foreground px-1">Jawaban / Penjelasan Singkat</label>
+                                             <Textarea value={cardForm.answer} onChange={e => setCardForm({...cardForm, answer: e.target.value})} className="rounded-xl border-black/5 bg-gray-50 font-medium" />
                                           </div>
-                                          <Button onClick={handleAddCard} className="w-full h-12 rounded-xl bg-sage text-white font-black uppercase">Simpan Kartu</Button>
+                                          <Button onClick={handleAddCard} className="w-full h-12 rounded-xl bg-primary text-white font-black uppercase tracking-widest shadow-soft">Simpan Kartu</Button>
                                        </div>
                                     </DialogContent>
                                  </Dialog>

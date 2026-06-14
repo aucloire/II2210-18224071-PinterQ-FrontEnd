@@ -22,8 +22,8 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "PinterQ — AI Study Assistant" },
-      { name: "description", content: "Platform belajar adaptif berbasis AI." },
+      { title: "Dashboard — PinterQ" },
+      { name: "description", content: "Lanjutkan belajarmu dengan asisten AI." },
     ],
   }),
 });
@@ -33,6 +33,10 @@ function Dashboard() {
   const navigate = useNavigate();
 
   if (!ready || !user) return null;
+
+  const displayName = user.fullName && user.fullName.trim() !== "" 
+    ? user.fullName 
+    : user.username;
 
   return (
     <div className="min-h-screen w-full bg-background">
@@ -73,7 +77,7 @@ function Dashboard() {
           {/* Greeting */}
           <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-3xl font-black tracking-tight">
-              Halo, {user.fullName || user.username}!
+              Halo, {displayName}!
             </h1>
             <p className="text-sm text-muted-foreground mt-1 font-medium">
               {normalizedRole(user.role) === "SUPERADMIN" && "Panel kontrol administrator sistem."}

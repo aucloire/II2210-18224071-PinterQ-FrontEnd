@@ -130,19 +130,19 @@ export function AdminDashboard() {
           title="Total Pengguna"
           value={allUsersCount}
           icon={<Users className="size-5" />}
-          color="text-blue-600 bg-blue-50"
+          color="text-primary/70 bg-primary/5"
         />
         <StatCard
-          title="Menunggu Persetujuan"
+          title="Menunggu"
           value={pendingCount}
           icon={<UserX className="size-5" />}
-          color="text-amber-600 bg-amber-50"
+          color="text-amber-600/70 bg-amber-50"
         />
         <StatCard
           title="Murid Aktif"
           value={studentCount}
           icon={<TrendingUp className="size-5" />}
-          color="text-green-600 bg-green-50"
+          color="text-sage/70 bg-sage/5"
         />
       </div>
 

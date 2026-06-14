@@ -20,6 +20,11 @@ export const Route = createFileRoute("/study/flashcard/$id")({
       throw redirect({ to: "/login" });
     }
   },
+  head: () => ({
+    meta: [
+      { title: "Flashcards — PinterQ" },
+    ],
+  }),
 });
 
 function StudyFlashcardPage() {
@@ -100,7 +105,7 @@ function StudyFlashcardPage() {
               </p>
             </motion.div>
 
-            <div className="bg-white/40 p-6 sm:p-10 rounded-[40px] border border-black/5 shadow-soft">
+            <div className="bg-rose/5 p-6 sm:p-10 rounded-[40px] border border-rose/10 shadow-soft">
               <FlashcardCarousel cards={cards} />
             </div>
             

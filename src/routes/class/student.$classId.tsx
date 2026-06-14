@@ -191,10 +191,10 @@ function StudentClassDetailPage() {
                                  <h3 className="text-2xl font-black tracking-tight group-hover:text-primary transition-colors">{data.title}</h3>
                                  <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                                       <ClipboardCheck className="size-3.5 text-blue-500" /> {data.quizzes.length} Pertanyaan
+                                       <ClipboardCheck className="size-3.5 text-primary/60" /> {data.quizzes.length} Pertanyaan
                                     </span>
                                     <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                                       <FileText className="size-3.5 text-purple-500" /> {data.flashcards.length} Flashcard
+                                       <FileText className="size-3.5 text-sage/60" /> {data.flashcards.length} Flashcard
                                     </span>
                                  </div>
                               </div>

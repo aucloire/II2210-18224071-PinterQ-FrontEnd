@@ -120,6 +120,28 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
 
   return (
     <div className="space-y-10">
+      {/* Overview Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StatCard 
+          title="Kuis Selesai" 
+          value={joinedClasses.length * 2} // Mock for now
+          icon={<Trophy className="size-6" />}
+          color="text-primary/70 bg-primary/5"
+        />
+        <StatCard 
+          title="Total Flashcard" 
+          value={joinedClasses.length * 15} // Mock for now
+          icon={<FileText className="size-6" />}
+          color="text-sage/70 bg-sage/5"
+        />
+        <StatCard 
+          title="Akurasi" 
+          value="85%" 
+          icon={<Sparkles className="size-6" />}
+          color="text-rose/70 bg-rose/5"
+        />
+      </div>
+
       {/* Tab Switcher & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="flex p-1 bg-secondary rounded-xl w-fit">
@@ -298,5 +320,23 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function StatCard({ title, value, icon, color }: {
+  title: string; value: number | string; icon: React.ReactNode; color: string;
+}) {
+  return (
+    <Card className="border border-black/5 shadow-sm bg-white">
+      <CardContent className="p-6 flex items-center gap-4">
+        <div className={`size-12 rounded-xl flex items-center justify-center ${color}`}>
+          {icon}
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
