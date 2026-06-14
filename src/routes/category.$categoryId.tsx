@@ -131,8 +131,9 @@ function CategoryDetailPage() {
       setNewContent("");
       setIsAddOpen(false);
       fetchData();
-    } catch (err) {
-      alert("Gagal menambah topik");
+    } catch (err: any) {
+      console.error(err);
+      alert("Gagal menambah topik: " + (err.message || "Unknown Error"));
     } finally {
       setIsCreating(false);
     }
