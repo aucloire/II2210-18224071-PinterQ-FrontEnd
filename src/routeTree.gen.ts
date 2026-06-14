@@ -14,11 +14,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CategoryCategoryIdRouteImport } from './routes/category/$categoryId'
-import { Route as StudyQuizIdRouteImport } from './routes/study/quiz/$id'
-import { Route as StudyFlashcardIdRouteImport } from './routes/study/flashcard/$id'
-import { Route as ClassTeacherClassIdRouteImport } from './routes/class/teacher/$classId'
-import { Route as ClassStudentClassIdRouteImport } from './routes/class/student/$classId'
+import { Route as CategoryCategoryIdRouteImport } from './routes/category.$categoryId'
+import { Route as StudyQuizIdRouteImport } from './routes/study.quiz.$id'
+import { Route as StudyFlashcardIdRouteImport } from './routes/study.flashcard.$id'
+import { Route as ClassTeacherClassIdRouteImport } from './routes/class.teacher.$classId'
+import { Route as ClassStudentClassIdRouteImport } from './routes/class.student.$classId'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',

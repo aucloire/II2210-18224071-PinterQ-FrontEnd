@@ -202,32 +202,6 @@ function CategoryDetailPage() {
             </motion.div>
           </section>
 
-          {/* Adaptive Actions — Only show if there is some progress */}
-          {history.length > 0 && (
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="p-8 rounded-[32px] bg-white border border-black/5 shadow-soft flex flex-col gap-6 group hover:border-primary/20 transition-all">
-                  <div className="size-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Target className="size-7" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black">Level Up: HOTS</h3>
-                    <p className="text-sm text-muted-foreground mt-1 font-medium">Generate soal tantangan berpikir kritis dari materi terakhir.</p>
-                  </div>
-                  <Button onClick={() => onGenerateAdaptive("HOTS")} className="w-full h-12 rounded-xl bg-primary font-black uppercase tracking-widest">Generate HOTS</Button>
-              </div>
-              <div className="p-8 rounded-[32px] bg-sage/5 border border-sage/10 shadow-soft flex flex-col gap-6 group hover:border-sage/30 transition-all">
-                  <div className="size-14 rounded-2xl bg-sage/10 text-sage flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Zap className="size-7" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-sage">Fundamental</h3>
-                    <p className="text-sm text-muted-foreground mt-1 font-medium">Perkuat konsep dasar jika kamu merasa masih kesulitan.</p>
-                  </div>
-                  <Button onClick={() => onGenerateAdaptive("DASAR")} variant="outline" className="w-full h-12 rounded-xl border-sage/20 text-sage font-black uppercase tracking-widest">Generate Dasar</Button>
-              </div>
-            </section>
-          )}
-
           {/* Topics List */}
           <section className="space-y-12">
             <div className="flex items-center gap-3">
@@ -243,32 +217,63 @@ function CategoryDetailPage() {
                   <p className="font-bold italic">Belum ada materi di kategori ini.</p>
                </div>
             ) : (
-               <div className="grid gap-6">
+               <div className="grid gap-8">
                   {Object.entries(groupedMaterials).map(([mId, data]) => (
-                    <Card key={mId} className="border-0 shadow-soft bg-background rounded-[32px] overflow-hidden group hover:bg-white transition-all">
-                       <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-                          <div className="flex items-center gap-6 flex-1">
-                             <div className={`size-16 rounded-2xl flex items-center justify-center shadow-sm ${data.bestScore ? 'bg-sage/10 text-sage' : 'bg-primary/5 text-primary/30'}`}>
-                                {data.bestScore ? <Award className="size-8" /> : <BookOpen className="size-8 opacity-20" />}
+                    <Card key={mId} className="border-0 shadow-soft bg-background rounded-[40px] overflow-hidden group hover:bg-white transition-all">
+                       <CardContent className="p-0">
+                          <div className="p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                             <div className="flex items-center gap-8 flex-1">
+                                <div className={`size-20 rounded-[32px] flex items-center justify-center shadow-sm ${data.bestScore ? 'bg-sage/10 text-sage' : 'bg-primary/5 text-primary/30'}`}>
+                                   {data.bestScore ? <Award className="size-10" /> : <BookOpen className="size-10 opacity-20" />}
+                                </div>
+                                <div>
+                                   <h3 className="text-2xl font-black tracking-tight">{data.title}</h3>
+                                   <div className="flex gap-4 mt-2">
+                                      <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1.5">
+                                         <ClipboardCheck className="size-4" /> {data.quizzes.length} Soal
+                                      </span>
+                                      <span className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-1.5">
+                                         <FileText className="size-4" /> {data.flashcards.length} Flashcard
+                                      </span>
+                                   </div>
+                                </div>
                              </div>
-                             <div>
-                                <h3 className="text-xl font-black">{data.title}</h3>
-                                <div className="flex gap-4 mt-1">
-                                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{data.quizzes.length} Soal</span>
-                                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{data.flashcards.length} Flashcard</span>
+
+                             <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                                {data.bestScore !== undefined && (
+                                   <div className="text-center sm:text-right mr-4 px-6 border-r border-black/5 hidden sm:block">
+                                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Skor Terbaik</p>
+                                      <p className="text-3xl font-black text-primary">{Math.round(data.bestScore)}%</p>
+                                   </div>
+                                )}
+                                <div className="grid grid-cols-2 sm:flex items-center gap-3 w-full sm:w-auto">
+                                   <Link to="/study/flashcard/$id" params={{ id: String(mId) }} search={{ categoryId: catIdNum }} className="h-12 px-6 rounded-2xl border border-primary/10 text-primary font-black text-[11px] uppercase tracking-widest flex items-center justify-center hover:bg-primary/5 transition-all">Hafalkan</Link>
+                                   <Link to="/study/quiz/$id" params={{ id: String(mId) }} search={{ categoryId: catIdNum }} className="h-12 px-8 rounded-2xl bg-primary text-white font-black text-[11px] uppercase tracking-widest shadow-glow flex items-center justify-center gap-2">Mulai Kuis <ArrowRight className="size-4" /></Link>
                                 </div>
                              </div>
                           </div>
-                          <div className="flex items-center gap-4 w-full md:w-auto">
-                             {data.bestScore !== undefined && (
-                                <div className="text-right mr-4 hidden sm:block">
-                                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Skor Terbaik</p>
-                                   <p className="text-2xl font-black text-primary">{Math.round(data.bestScore)}%</p>
-                                </div>
-                             )}
-                             <Link to="/study/flashcard/$id" params={{ id: String(mId) }} search={{ categoryId: catIdNum }} className="flex-1 md:flex-none h-11 px-6 rounded-xl border border-primary/20 text-primary font-black text-[10px] uppercase tracking-widest flex items-center justify-center hover:bg-primary/5 transition-all">Hafalkan</Link>
-                             <Link to="/study/quiz/$id" params={{ id: String(mId) }} search={{ categoryId: catIdNum }} className="flex-1 md:flex-none h-11 px-8 rounded-xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-glow flex items-center justify-center gap-2">Mulai <ArrowRight className="size-3.5" /></Link>
-                          </div>
+
+                          {/* Adaptive Logic Area — Only show if basic is done */}
+                          {data.bestScore !== undefined && (
+                             <div className="px-8 pb-8 pt-0 flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-black/[0.03] mt-2">
+                                <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40 py-4 hidden md:block">Tingkatkan Pemahaman:</div>
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => onGenerateAdaptive("HOTS")} 
+                                  className="h-10 px-6 rounded-xl bg-sage/10 text-sage hover:bg-sage/20 border-0 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                                >
+                                   <Target className="size-3.5" /> Level Up: HOTS
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => onGenerateAdaptive("DASAR")} 
+                                  className="h-10 px-6 rounded-xl border-black/5 text-muted-foreground hover:bg-black/5 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                                >
+                                   <Zap className="size-3.5" /> Re-Fundamental
+                                </Button>
+                             </div>
+                          )}
                        </CardContent>
                     </Card>
                   ))}
