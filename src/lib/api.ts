@@ -133,6 +133,38 @@ export const api = {
     return res.json();
   },
 
+  // === FLASHCARDS CRUD ===
+  createFlashcard: async (materialId: number, data: any) => {
+    const res = await fetch(`${BASE_URL}/study/flashcards`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ materialId, ...data }),
+    });
+    if (!res.ok) throw new Error("Gagal membuat flashcard");
+    return res.json();
+  },
+
+  deleteFlashcard: async (flashcardId: number) => {
+    const res = await fetch(`${BASE_URL}/study/flashcards/${flashcardId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal menghapus flashcard");
+    return res.json();
+  },
+
+  getFlashcards: async (categoryId: number) => {
+    const res = await fetch(`${BASE_URL}/study/flashcards/${categoryId}`);
+    if (!res.ok) throw new Error("Gagal mengambil flashcard");
+    return res.json();
+  },
+
+  getQuizzes: async (categoryId: number) => {
+    const res = await fetch(`${BASE_URL}/study/quizzes/${categoryId}`);
+    if (!res.ok) throw new Error("Gagal mengambil quiz");
+    return res.json();
+  },
+
   // === QUIZ SUBMISSION ===
   submitQuizAttempt: async (userId: number, materialId: number, score: number) => {
     const res = await fetch(`${BASE_URL}/study/submit-attempt`, {

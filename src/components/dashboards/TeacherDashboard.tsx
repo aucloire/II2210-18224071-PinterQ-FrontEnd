@@ -28,7 +28,6 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    if (!teacherId) return;
     loadClasses();
   }, [teacherId]);
 
@@ -36,7 +35,7 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
     setLoading(true);
     try {
       const data = await api.getTeacherClasses(teacherId);
-      setClasses(data);
+      setClasses(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -78,46 +77,43 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
   }
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-10">
       {/* Title & Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
-        <div className="flex items-center gap-4">
-          <div className="size-12 rounded-2xl bg-primary flex items-center justify-center shadow-soft text-white shrink-0">
-            <BookOpen className="size-6" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <div className="size-10 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
+            <BookOpen className="size-5" />
           </div>
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-foreground">Ruang Kelas</h2>
-            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">Kelola Pengajaran & Materi</p>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">Ruang Kelas</h2>
+            <p className="text-xs text-muted-foreground font-medium">Kelola Pengajaran & Materi</p>
           </div>
         </div>
 
         <Dialog open={createClassOpen} onOpenChange={setCreateClassOpen}>
           <DialogTrigger asChild>
-            <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-2xl bg-primary text-white font-black text-xs uppercase tracking-widest shadow-glow hover:brightness-105 active:scale-95 transition-all">
-              <Plus className="size-4" />
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold text-xs h-10 px-6 rounded-xl">
+              <Plus className="size-4 mr-2" />
               Buat Kelas Baru
-            </button>
+            </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] rounded-[32px] border-white/20 glass-strong">
+          <DialogContent className="sm:max-w-md rounded-2xl">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-black">Buat Kelas</DialogTitle>
-              <DialogDescription className="text-sm font-medium">Berikan nama untuk kelas baru Anda.</DialogDescription>
+              <DialogTitle className="text-xl font-bold">Buat Kelas</DialogTitle>
+              <DialogDescription className="text-sm">Berikan nama untuk kelas baru Anda.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-6 pt-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Nama Kelas</label>
-                <Input
-                  placeholder="Contoh: Pemrograman Java Lanjut"
-                  value={newClassName}
-                  onChange={(e) => setNewClassName(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleCreateClass()}
-                  className="h-12 rounded-2xl border-black/5 bg-white/50 text-sm font-bold focus:ring-sage/20 transition-all"
-                />
-              </div>
+            <div className="space-y-4 pt-4">
+              <Input
+                placeholder="Contoh: Pemrograman Java"
+                value={newClassName}
+                onChange={(e) => setNewClassName(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleCreateClass()}
+                className="h-12 rounded-xl"
+              />
               <Button 
                 onClick={handleCreateClass} 
                 disabled={!newClassName.trim() || creating}
-                className="w-full h-12 rounded-2xl bg-primary text-white font-black uppercase tracking-widest shadow-soft"
+                className="w-full h-11 rounded-xl bg-primary text-white font-bold"
               >
                 {creating ? <Loader2 className="size-4 animate-spin" /> : "Buat Sekarang"}
               </Button>
@@ -127,9 +123,9 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
       </div>
 
       {/* Class Cards */}
-      <section className="space-y-8">
+      <section className="space-y-6">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sage">Daftar Kelas</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Daftar Kelas</span>
           <div className="h-px flex-1 bg-black/5"></div>
         </div>
 
@@ -150,39 +146,41 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                 >
-                  <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all rounded-[32px] overflow-hidden group">
-                    <CardContent className="p-8">
-                      <div className="flex items-start justify-between mb-8">
-                        <div className="size-14 rounded-2xl bg-sage/10 flex items-center justify-center text-sage">
-                           <BookOpen className="size-7" />
+                  <Card className="border border-black/5 shadow-sm hover:shadow-md transition-all rounded-2xl overflow-hidden group bg-white">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="size-12 rounded-xl bg-sage/10 flex items-center justify-center text-sage">
+                           <BookOpen className="size-6" />
                         </div>
                         <div className="text-right">
-                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Kode Kelas</p>
-                           <p className="text-lg font-mono font-black text-primary">{cls.classCode}</p>
+                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Kode</p>
+                           <p className="text-base font-mono font-bold text-primary">{cls.classCode}</p>
                         </div>
                       </div>
 
-                      <h3 className="text-xl font-black tracking-tight mb-2 line-clamp-1">{cls.name}</h3>
+                      <h3 className="text-lg font-bold tracking-tight mb-1 line-clamp-1">{cls.name}</h3>
                       
-                      <div className="flex items-center gap-2 text-muted-foreground mb-10">
-                        <UsersRound className="size-4" />
-                        <span className="text-xs font-bold uppercase tracking-wider">{cls.memberCount} Murid Bergabung</span>
+                      <div className="flex items-center gap-2 text-muted-foreground mb-6">
+                        <UsersRound className="size-3.5" />
+                        <span className="text-xs font-medium">{cls.memberCount} Murid Bergabung</span>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <Link
                           to="/class/teacher/$classId"
                           params={{ classId: cls.id.toString() }}
-                          className="flex-1 inline-flex items-center justify-center px-6 h-11 rounded-xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-soft hover:brightness-105 active:scale-95 transition"
+                          className="flex-1 inline-flex items-center justify-center h-10 rounded-lg bg-primary text-white font-bold text-xs hover:brightness-105 active:scale-95 transition"
                         >
-                          Lihat Detail <ArrowRight className="size-3.5 ml-2" />
+                          Buka Kelas
                         </Link>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDeleteClass(cls.id)}
-                          className="size-11 flex items-center justify-center rounded-xl glass border border-destructive/10 text-destructive hover:bg-destructive/5 transition"
+                          className="size-10 rounded-lg text-destructive hover:bg-destructive/5"
                         >
                           <Trash2 className="size-4" />
-                        </button>
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -200,14 +198,14 @@ function StatCard({ title, value, icon, color }: {
   title: string; value: number | string; icon: React.ReactNode; color: string;
 }) {
   return (
-    <Card className="border-0 shadow-sm">
-      <CardContent className="p-5 flex items-center gap-4">
-        <div className={`size-12 rounded-2xl flex items-center justify-center ${color}`}>
+    <Card className="border border-black/5 shadow-sm bg-white">
+      <CardContent className="p-6 flex items-center gap-4">
+        <div className={`size-12 rounded-xl flex items-center justify-center ${color}`}>
           {icon}
         </div>
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>
-          <p className="text-3xl font-black">{value}</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
         </div>
       </CardContent>
     </Card>

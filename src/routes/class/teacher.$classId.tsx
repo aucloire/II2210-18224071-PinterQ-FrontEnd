@@ -145,6 +145,13 @@ function TeacherClassDetailPage() {
     explanation: ""
   });
 
+  // Add Flashcard Modal States
+  const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+  const [cardForm, setCardForm] = useState({
+    question: "",
+    answer: ""
+  });
+
   const handleAddQuiz = async () => {
     if (!activeMaterialId) return;
     try {
@@ -154,6 +161,18 @@ function TeacherClassDetailPage() {
       fetchData();
     } catch (err) {
       alert("Gagal menambah kuis");
+    }
+  };
+
+  const handleAddCard = async () => {
+    if (!activeMaterialId) return;
+    try {
+      await api.createFlashcard(activeMaterialId, cardForm);
+      setIsAddCardOpen(false);
+      setCardForm({ question: "", answer: "" });
+      fetchData();
+    } catch (err) {
+      alert("Gagal menambah flashcard");
     }
   };
 
@@ -351,9 +370,30 @@ function TeacherClassDetailPage() {
                                     </DialogContent>
                                  </Dialog>
 
-                                 <Button variant="outline" className="h-12 rounded-2xl border-black/5 bg-white/50 font-black text-[10px] uppercase tracking-[0.2em] shadow-sm">
-                                    <ListChecks className="size-4 mr-2" /> Kelola Semua
-                                 </Button>
+                                 <Dialog open={isAddCardOpen && activeMaterialId === data.id} onOpenChange={(open) => { setIsAddCardOpen(open); if(open) setActiveMaterialId(data.id); }}>
+                                    <DialogTrigger asChild>
+                                       <Button variant="outline" className="h-12 rounded-2xl border-black/5 bg-white/50 font-black text-[10px] uppercase tracking-[0.2em] shadow-sm">
+                                          <Plus className="size-4 mr-2" /> Tambah Flashcard
+                                       </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-xl rounded-[40px] glass-strong p-8">
+                                       <DialogHeader>
+                                          <DialogTitle className="text-2xl font-black">Tambah Flashcard</DialogTitle>
+                                          <DialogDescription>Topik: {data.title}</DialogDescription>
+                                       </DialogHeader>
+                                       <div className="space-y-4 pt-4">
+                                          <div className="space-y-1">
+                                             <label className="text-[10px] font-black uppercase text-muted-foreground">Pertanyaan / Kata Kunci</label>
+                                             <Input value={cardForm.question} onChange={e => setCardForm({...cardForm, question: e.target.value})} className="h-12 rounded-xl" />
+                                          </div>
+                                          <div className="space-y-1">
+                                             <label className="text-[10px] font-black uppercase text-muted-foreground">Jawaban / Penjelasan Singkat</label>
+                                             <Textarea value={cardForm.answer} onChange={e => setCardForm({...cardForm, answer: e.target.value})} className="rounded-xl" />
+                                          </div>
+                                          <Button onClick={handleAddCard} className="w-full h-12 rounded-xl bg-sage text-white font-black uppercase">Simpan Kartu</Button>
+                                       </div>
+                                    </DialogContent>
+                                 </Dialog>
                                  
                                  <button onClick={() => { setNewTopicTopicTitle(data.title); handleAddTopic(true); }} className="h-12 rounded-2xl bg-sage text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-soft flex items-center justify-center gap-2 hover:brightness-105 transition-all">
                                     <Sparkles className="size-4" /> Generate Lagi

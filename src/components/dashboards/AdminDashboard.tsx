@@ -110,65 +110,68 @@ export function AdminDashboard() {
   );
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-10">
       {/* Title */}
-      <div className="flex items-center gap-4">
-        <div className="size-14 rounded-2xl bg-primary flex items-center justify-center shadow-soft text-white shrink-0">
-          <ShieldCheck className="size-7" />
+      <div className="flex items-center gap-3">
+        <div className="size-10 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
+          <ShieldCheck className="size-5" />
         </div>
         <div>
-          <h2 className="text-3xl font-black tracking-tight">Manajemen Platform</h2>
-          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mt-1">Kontrol Pengguna & Hak Akses Sistem</p>
+          <h2 className="text-xl font-bold tracking-tight">Manajemen Platform</h2>
+          <p className="text-xs text-muted-foreground font-medium">Kontrol Pengguna & Hak Akses</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard
           title="Total Pengguna"
           value={allUsersCount}
-          icon={<Users className="size-6" />}
+          icon={<Users className="size-5" />}
           color="text-blue-600 bg-blue-50"
         />
         <StatCard
           title="Menunggu Persetujuan"
           value={pendingCount}
-          icon={<UserX className="size-6" />}
+          icon={<UserX className="size-5" />}
           color="text-amber-600 bg-amber-50"
         />
         <StatCard
           title="Murid Aktif"
           value={studentCount}
-          icon={<TrendingUp className="size-6" />}
+          icon={<TrendingUp className="size-5" />}
           color="text-green-600 bg-green-50"
         />
       </div>
 
       {/* User Management Section */}
-      <section className="space-y-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
-          <div className="flex p-1.5 glass-strong rounded-[20px] shadow-soft border border-white/20 w-fit">
+      <section className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex p-1 bg-secondary rounded-xl w-fit">
             <button
               onClick={() => setActiveTab("pending")}
-              className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "pending" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "pending" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
             >
               Pending ({pendingCount})
             </button>
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "all" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "all" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Semua Database User
+              Semua User
             </button>
           </div>
 
-          <div className="relative group flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
+          <div className="relative flex-1 max-w-sm">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <Search className="size-4" />
+            </div>
+            <input
+              type="text"
               placeholder="Cari nama atau username..."
               value={filter}
               onChange={e => setFilter(e.target.value)}
-              className="pl-12 w-full h-14 rounded-[22px] text-sm font-bold border-black/5 bg-white shadow-soft focus:ring-sage/20 transition-all"
+              className="w-full h-10 pl-10 pr-4 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
             />
           </div>
         </div>
@@ -193,92 +196,88 @@ export function AdminDashboard() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ delay: idx * 0.02 }}
-                  className="bg-white/40 p-4 rounded-[20px] border border-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                  className="bg-white p-4 rounded-xl border border-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group hover:shadow-md transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="size-12 rounded-xl bg-white flex items-center justify-center relative shadow-sm border border-black/5">
-                      <UserIcon className="size-6 text-foreground/10" />
+                    <div className="size-10 rounded-lg bg-secondary flex items-center justify-center relative border border-black/5">
+                      <UserIcon className="size-5 text-muted-foreground/30" />
                       {u.approvalStatus === "APPROVED" && (
-                        <div className="absolute -top-1.5 -right-1.5 size-5 bg-sage rounded-full border-2 border-white flex items-center justify-center shadow-soft">
-                          <BadgeCheck className="size-3 text-white" />
+                        <div className="absolute -top-1 -right-1 size-4 bg-sage rounded-full border border-white flex items-center justify-center shadow-sm">
+                          <BadgeCheck className="size-2.5 text-white" />
                         </div>
                       )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         {u.fullName && (
-                          <span className="font-bold text-sm text-foreground leading-none">{u.fullName}</span>
+                          <span className="font-bold text-sm text-foreground">{u.fullName}</span>
                         )}
-                        <span className="text-[11px] font-semibold text-muted-foreground">@{u.username}</span>
-                        <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.1em] ${
+                        <span className="text-xs font-medium text-muted-foreground">@{u.username}</span>
+                        <Badge variant="secondary" className={`text-[9px] font-bold px-1.5 h-4 ${
                           u.role === "SUPERADMIN" ? "bg-purple-100 text-purple-700" :
                           u.role === "GURU" ? "bg-blue-100 text-blue-700" :
                           "bg-green-100 text-green-700"
                         }`}>
                           {u.role}
-                        </span>
+                        </Badge>
                       </div>
-                      <p className="text-[11px] font-semibold text-muted-foreground mt-1 leading-none">{u.email}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{u.email}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2">
                     {activeTab === "pending" ? (
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        <button
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
                           onClick={() => handleApprove(u.id)}
-                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 h-9 rounded-xl bg-sage text-white font-bold text-[10px] uppercase tracking-widest shadow-soft hover:brightness-105 active:scale-95 transition"
+                          className="bg-sage hover:bg-sage/90 text-white font-bold text-xs h-9 px-4 rounded-lg"
                         >
-                          <UserCheck className="size-3.5" />
                           Approve
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => handleReject(u.id)}
-                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 h-9 rounded-xl glass border border-destructive/20 text-destructive font-bold text-[10px] uppercase tracking-widest hover:bg-destructive/5 active:scale-95 transition"
+                          className="text-destructive hover:bg-destructive/5 font-bold text-xs h-9 px-4 rounded-lg"
                         >
-                          <UserX className="size-3.5" />
                           Reject
-                        </button>
+                        </Button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2.5">
-                         <div className="relative group">
-                            <select
-                              value={u.role}
-                              onChange={(e) => handleSetRole(u.id, e.target.value)}
-                              className="appearance-none h-9 pl-4 pr-9 rounded-xl glass border-none text-[11px] font-bold text-foreground focus:ring-2 focus:ring-primary/30 transition shadow-inner cursor-pointer hover:bg-blue-50/50"
-                            >
-                              <option value="MURID">MURID</option>
-                              <option value="GURU">GURU</option>
-                              <option value="SUPERADMIN">SUPERADMIN</option>
-                            </select>
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group-hover:text-blue-500 transition-colors">
-                               <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                               </svg>
-                            </div>
-                         </div>
+                      <div className="flex items-center gap-2">
+                         <select
+                            value={u.role}
+                            onChange={(e) => handleSetRole(u.id, e.target.value)}
+                            className="h-9 px-3 rounded-lg border border-border bg-white text-xs font-semibold focus:ring-2 focus:ring-primary/20 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="MURID">MURID</option>
+                            <option value="GURU">GURU</option>
+                            <option value="SUPERADMIN">ADMIN</option>
+                          </select>
                          
                          {u.approvalStatus === "PENDING" && (
-                            <button
+                            <Button
+                              size="sm"
                               onClick={() => handleApprove(u.id)}
-                              className="px-4 h-9 rounded-xl bg-sage text-white font-bold text-[10px] uppercase tracking-widest shadow-soft active:scale-95 transition"
+                              className="bg-sage hover:bg-sage/90 text-white font-bold text-xs h-9 px-4 rounded-lg"
                             >
                               Approve
-                            </button>
+                            </Button>
                          )}
                       </div>
                     )}
 
                     {/* Delete button always visible in "all" tab */}
                     {activeTab === "all" && u.role !== "SUPERADMIN" && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleDelete(u.id, u.username)}
-                        className="inline-flex items-center justify-center gap-1.5 px-3 h-9 rounded-xl glass border border-destructive/20 text-destructive font-bold text-[10px] uppercase tracking-widest hover:bg-destructive/5 active:scale-95 transition"
+                        className="text-destructive hover:bg-destructive/5 size-9 rounded-lg"
                       >
-                        <Trash2 className="size-3" />
-                        Hapus
-                      </button>
+                        <Trash2 className="size-4" />
+                      </Button>
                     )}
                   </div>
                 </motion.div>
@@ -295,14 +294,14 @@ function StatCard({ title, value, icon, color }: {
   title: string; value: number | string; icon: React.ReactNode; color: string;
 }) {
   return (
-    <Card className="border-0 shadow-soft bg-white/50 backdrop-blur-sm">
-      <CardContent className="p-5 flex items-center gap-4">
-        <div className={`size-14 rounded-2xl flex items-center justify-center shadow-sm ${color}`}>
+    <Card className="border border-black/5 shadow-sm bg-white">
+      <CardContent className="p-6 flex items-center gap-4">
+        <div className={`size-12 rounded-xl flex items-center justify-center ${color}`}>
           {icon}
         </div>
         <div>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
-          <p className="text-3xl font-black tracking-tight">{value}</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
+          <p className="text-2xl font-bold">{value}</p>
         </div>
       </CardContent>
     </Card>

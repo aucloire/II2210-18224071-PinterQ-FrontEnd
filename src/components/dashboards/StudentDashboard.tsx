@@ -60,7 +60,6 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    if (!studentId) return;
     loadJoinedClasses();
     loadSelfStudyCategories();
   }, [studentId]);
@@ -120,22 +119,22 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
       {/* Tab Switcher & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div className="flex p-1 glass-strong rounded-[18px] shadow-soft border border-white/20 w-fit">
+        <div className="flex p-1 bg-secondary rounded-xl w-fit">
           <button
             onClick={() => setActiveTab("class")}
-            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === "class" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              activeTab === "class" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Ruang Kelas
           </button>
           <button
             onClick={() => setActiveTab("self")}
-            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === "self" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              activeTab === "self" ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Belajar Mandiri
@@ -145,24 +144,24 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
         {activeTab === "class" ? (
           <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
             <DialogTrigger asChild>
-              <button className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-soft hover:brightness-105 transition-all">
-                <Plus className="size-4" /> Gabung Kelas
-              </button>
+              <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-bold text-xs h-10 px-6 rounded-xl">
+                <Plus className="size-4 mr-2" /> Gabung Kelas
+              </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-sm rounded-[32px] border-white/20 glass-strong">
+            <DialogContent className="sm:max-w-md rounded-2xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-black text-center">Gabung Kelas</DialogTitle>
+                <DialogTitle className="text-xl font-bold">Gabung Kelas</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4 text-center">
                 <Input
-                  placeholder="MASUKKAN KODE KELAS"
+                  placeholder="Kode Kelas"
                   value={joinCode}
                   onChange={e => setJoinCode(e.target.value.toUpperCase())}
                   onKeyDown={e => e.key === "Enter" && handleJoinClass()}
-                  className="h-14 rounded-2xl border-black/5 bg-white text-center font-mono text-xl font-black tracking-[0.3em] focus:ring-sage/20 uppercase"
+                  className="h-12 rounded-xl text-center font-mono text-lg font-bold tracking-widest"
                 />
-                <Button onClick={handleJoinClass} disabled={!joinCode.trim() || joining} className="w-full h-12 rounded-xl bg-primary font-black uppercase tracking-widest shadow-soft">
-                  {joining ? <Loader2 className="size-4 animate-spin" /> : "GABUNG SEKARANG"}
+                <Button onClick={handleJoinClass} disabled={!joinCode.trim() || joining} className="w-full h-11 rounded-xl bg-primary text-white font-bold">
+                  {joining ? <Loader2 className="size-4 animate-spin" /> : "Gabung Sekarang"}
                 </Button>
               </div>
             </DialogContent>
@@ -170,13 +169,13 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
         ) : (
           <Dialog open={createCatOpen} onOpenChange={setCreateCatOpen}>
             <DialogTrigger asChild>
-              <button className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-sage text-white font-black text-[10px] uppercase tracking-widest shadow-soft hover:brightness-105 transition-all">
-                <Plus className="size-4" /> Kategori Baru
-              </button>
+              <Button size="sm" className="bg-sage hover:bg-sage/90 text-white font-bold text-xs h-10 px-6 rounded-xl">
+                <Plus className="size-4 mr-2" /> Kategori Baru
+              </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-sm rounded-[32px] border-white/20 glass-strong">
+            <DialogContent className="sm:max-w-md rounded-2xl">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-black">Tambah Kategori</DialogTitle>
+                <DialogTitle className="text-xl font-bold">Tambah Kategori</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <Input
@@ -184,10 +183,10 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
                   value={newCatName}
                   onChange={e => setNewCatName(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleCreateCategory()}
-                  className="h-12 rounded-xl border-black/5 bg-white font-bold"
+                  className="h-12 rounded-xl"
                 />
-                <Button onClick={handleCreateCategory} disabled={!newCatName.trim() || creating} className="w-full h-12 rounded-xl bg-sage text-white font-black uppercase tracking-widest">
-                  {creating ? <Loader2 className="size-4 animate-spin" /> : "TAMBAH"}
+                <Button onClick={handleCreateCategory} disabled={!newCatName.trim() || creating} className="w-full h-11 rounded-xl bg-sage text-white font-bold">
+                  {creating ? <Loader2 className="size-4 animate-spin" /> : "Tambah"}
                 </Button>
               </div>
             </DialogContent>
@@ -222,26 +221,26 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
                     params={{ classId: String(cls.id) }}
                     className="block group"
                   >
-                    <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-[28px] overflow-hidden">
-                      <CardContent className="p-7">
-                         <div className="flex items-center justify-between mb-6">
-                            <div className="size-12 rounded-2xl bg-sage/10 flex items-center justify-center text-sage group-hover:scale-110 transition-transform">
-                               <BookOpen className="size-6" />
+                    <Card className="border border-black/5 shadow-sm hover:shadow-md transition-all cursor-pointer rounded-2xl overflow-hidden bg-white">
+                      <CardContent className="p-6">
+                         <div className="flex items-center justify-between mb-4">
+                            <div className="size-10 rounded-lg bg-sage/10 flex items-center justify-center text-sage">
+                               <BookOpen className="size-5" />
                             </div>
-                            <span className="text-[10px] font-black bg-secondary/30 px-2 py-0.5 rounded-md uppercase tracking-widest text-primary">Aktif</span>
+                            <span className="text-[10px] font-bold text-primary px-2 py-0.5 bg-secondary rounded uppercase tracking-wider">Aktif</span>
                          </div>
 
-                        <h3 className="font-black text-xl leading-tight mb-2 group-hover:text-primary transition-colors">{cls.name}</h3>
+                        <h3 className="font-bold text-lg leading-tight mb-1">{cls.name}</h3>
                         
-                        <p className="text-[11px] text-muted-foreground font-medium flex items-center gap-2 mb-8">
+                        <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 mb-6">
                           <UsersRound className="size-3.5 text-sage" /> {cls.memberCount} Teman Belajar
                         </p>
 
                         <div className="flex items-center justify-between">
-                           <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.15em]">
-                              Kode: <span className="text-primary font-mono">{cls.classCode}</span>
+                           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                              KODE: <span className="text-primary font-mono">{cls.classCode}</span>
                            </div>
-                           <div className="size-9 rounded-full bg-primary flex items-center justify-center text-white shadow-soft group-hover:translate-x-1 transition-transform">
+                           <div className="size-8 rounded-full bg-primary flex items-center justify-center text-white group-hover:translate-x-1 transition-transform shadow-sm">
                               <ArrowRight className="size-4" />
                            </div>
                         </div>
@@ -280,19 +279,15 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
                     params={{ categoryId: String(cat.id) }}
                     className="block group"
                   >
-                    <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-[24px] overflow-hidden border-b-4 border-sage/20">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-xl bg-sage/10 flex items-center justify-center text-sage">
-                              <Layers className="size-5" />
-                            </div>
-                            <h3 className="font-black text-lg group-hover:text-primary transition-colors">{cat.name}</h3>
+                    <Card className="border border-black/5 shadow-sm hover:shadow-md transition-all cursor-pointer rounded-xl overflow-hidden bg-white">
+                      <CardContent className="p-5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="size-10 rounded-lg bg-sage/10 flex items-center justify-center text-sage">
+                            <Layers className="size-5" />
                           </div>
-                          <div className="size-8 rounded-full glass flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all">
-                            <ArrowRight className="size-4" />
-                          </div>
+                          <h3 className="font-bold text-base group-hover:text-primary transition-colors">{cat.name}</h3>
                         </div>
+                        <ArrowRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                       </CardContent>
                     </Card>
                   </Link>
