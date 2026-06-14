@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ChevronLeft, ShieldCheck, UserCheck, UserX, User as UserIcon, Loader2, BadgeCheck } from "lucide-react";
+import { Sparkles, ChevronLeft, ShieldCheck, UserCheck, UserX, Trash2, User as UserIcon, Loader2, BadgeCheck } from "lucide-react";
 import { getStoredUser, useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 
@@ -66,6 +66,16 @@ function AdminPage() {
       fetchUsers();
     } catch (err) {
       alert("Gagal mengubah role");
+    }
+  };
+
+  const handleDelete = async (userId: number, username: string) => {
+    if (!confirm(`Yakin ingin menghapus pengguna @${username}? Tindakan ini tidak dapat dibatalkan.`)) return;
+    try {
+      await api.deleteUser(userId);
+      setUsers(users.filter(u => u.id !== userId));
+    } catch (err) {
+      alert("Gagal menghapus pengguna");
     }
   };
 
@@ -144,10 +154,14 @@ function AdminPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-foreground leading-none">@{u.username}</h3>
+                        {u.fullName && (
+                          <span className="font-bold text-sm text-foreground leading-none">{u.fullName}</span>
+                        )}
+                        <span className="text-[11px] font-semibold text-muted-foreground">@{u.username}</span>
                         <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.1em] ${
                           u.role === "SUPERADMIN" ? "bg-purple-100 text-purple-700" :
-                          u.role === "GURU" ? "bg-blue-100 text-blue-700" : "bg-oak/10 text-oak"
+                          u.role === "GURU" ? "bg-blue-100 text-blue-700" :
+                          u.role === "MURID" ? "bg-green-100 text-green-700" : "bg-oak/10 text-oak"
                         }`}>
                           {u.role}
                         </span>
@@ -182,7 +196,7 @@ function AdminPage() {
                               onChange={(e) => handleSetRole(u.id, e.target.value)}
                               className="appearance-none h-9 pl-4 pr-9 rounded-xl glass border-none text-[11px] font-bold text-foreground focus:ring-2 focus:ring-primary/30 transition shadow-inner cursor-pointer hover:bg-blue-50/50"
                             >
-                              <option value="USER">USER</option>
+                              <option value="MURID">MURID</option>
                               <option value="GURU">GURU</option>
                               <option value="SUPERADMIN">SUPERADMIN</option>
                             </select>
@@ -202,6 +216,17 @@ function AdminPage() {
                             </button>
                          )}
                       </div>
+                    )}
+
+                    {/* Delete button always visible in "all" tab */}
+                    {activeTab === "all" && u.role !== "SUPERADMIN" && (
+                      <button
+                        onClick={() => handleDelete(u.id, u.username)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3 h-9 rounded-xl glass border border-destructive/20 text-destructive font-bold text-[10px] uppercase tracking-widest hover:bg-destructive/5 active:scale-95 transition"
+                      >
+                        <Trash2 className="size-3" />
+                        Hapus
+                      </button>
                     )}
                   </div>
                 </motion.div>

@@ -25,6 +25,8 @@ function Login() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"GURU" | "MURID">("MURID");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -33,7 +35,7 @@ function Login() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return;
-    if (mode === "register" && !email.trim()) return;
+    if (mode === "register" && (!email.trim() || !fullName.trim())) return;
 
     setIsLoading(true);
     setErrorMsg("");
@@ -42,22 +44,26 @@ function Login() {
       let data;
       if (mode === "login") {
         data = await api.login(username, password);
+        setStoredUser({
+          userId: String(data.userId),
+          username: data.username,
+          fullName: data.fullName || data.username,
+          role: data.role || "MURID",
+          profileImageUrl: data.profileImageUrl || "",
+          token: data.token || "",
+        });
+        navigate({ to: "/" });
       } else {
-        data = await api.register(username, email, password);
+        data = await api.register(username, email, password, selectedRole);
+        // No auto-login after register — show approval message
+        setErrorMsg("Akun berhasil dibuat. Silakan tunggu persetujuan Superadmin, lalu login.");
       }
-
-      setStoredUser({
-        userId: String(data.userId),
-        username: data.username,
-        token: data.token || "",
-        role: data.role || "USER",
-      });
-
-      navigate({ to: "/" });
     } catch (err: any) {
       const msg = err.message || "Gagal menghubungi server. Pastikan Backend menyala.";
-      if (err.message?.includes("401") || err.message?.includes("tidak valid")) {
+      if (err.message?.includes("401") || err.message?.includes("tidak valid") || err.message?.includes("salah")) {
         setErrorMsg("Username atau password salah.");
+      } else if (err.message?.includes("belum disetujui") || err.message?.includes("ditolak")) {
+        setErrorMsg(err.message);
       } else if (err.message?.includes("sudah")) {
         setErrorMsg(err.message);
       } else {
@@ -130,18 +136,66 @@ function Login() {
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <div className="py-1">
-                  <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="cth. raka@student.com"
-                    className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2"
-                    style={{ backgroundColor: "var(--color-secondary)" }}
-                  />
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Nama Lengkap
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="cth. Raka Pratama"
+                      className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2"
+                      style={{ backgroundColor: "var(--color-secondary)" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Peran
+                    </label>
+                    <div className="flex gap-2 mt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole("MURID")}
+                        className={`flex-1 h-12 rounded-2xl font-bold text-sm transition-all ${
+                          selectedRole === "MURID"
+                            ? "text-white shadow-soft"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                        style={selectedRole === "MURID" ? { backgroundColor: "var(--color-blush)" } : { backgroundColor: "var(--color-secondary)" }}
+                      >
+                        Murid
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedRole("GURU")}
+                        className={`flex-1 h-12 rounded-2xl font-bold text-sm transition-all ${
+                          selectedRole === "GURU"
+                            ? "text-white shadow-soft"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                        style={selectedRole === "GURU" ? { backgroundColor: "var(--color-blush)" } : { backgroundColor: "var(--color-secondary)" }}
+                      >
+                        Guru
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="cth. raka@student.com"
+                      className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2"
+                      style={{ backgroundColor: "var(--color-secondary)" }}
+                    />
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -174,7 +228,7 @@ function Login() {
             ) : mode === "login" ? (
               "Masuk"
             ) : (
-              "Daftar & masuk"
+              "Daftar"
             )}
           </motion.button>
         </form>

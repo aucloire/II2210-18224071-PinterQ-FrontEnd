@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Plus, LogOut, Layers, BookOpen, Wand2, Loader2, ShieldCheck, History } from "lucide-react";
+import { Sparkles, Plus, LogOut, Layers, BookOpen, Wand2, Loader2, ShieldCheck, History, User } from "lucide-react";
 import { FlashcardCarousel, QuizRunner } from "@/components/study";
 import { GenerateModal, NewSubjectModal } from "@/components/modals";
 import { getStoredUser, useAuth } from "@/lib/auth";
@@ -130,11 +130,27 @@ function Dashboard() {
         </div>
         
         <nav className="flex items-center gap-2 sm:gap-3">
+          <Link to="/profile" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft">
+            {user.profileImageUrl ? (
+              <img src={user.profileImageUrl} alt="avatar" className="size-4 rounded-full object-cover" />
+            ) : (
+              <User className="size-3.5" />
+            )}
+            <span className="hidden sm:inline">Profil</span>
+          </Link>
+
           <Link to="/history" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft">
             <History className="size-3.5" />
             <span className="hidden sm:inline">Riwayat</span>
           </Link>
-          
+
+          {user.role === "MURID" && (
+            <Link to="/explore" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft text-primary">
+              <Layers className="size-3.5" />
+              <span className="hidden sm:inline">Jelajahi</span>
+            </Link>
+          )}
+
           {user.role === "SUPERADMIN" && (
             <Link to="/admin" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft text-primary">
               <ShieldCheck className="size-3.5" />
@@ -159,7 +175,7 @@ function Dashboard() {
           className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-4 text-[10px] font-black uppercase tracking-widest bg-white/40 border border-white/20"
         >
           <Wand2 className="size-3 text-primary" />
-          Halo, {user.username} 👋
+          Halo, {user.fullName || user.username} 👋
         </motion.div>
         <h1 className="text-3xl sm:text-5xl font-black leading-tight tracking-tight">
           Mau belajar apa <br /><span className="text-primary">hari ini?</span>
@@ -174,7 +190,7 @@ function Dashboard() {
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-oak leading-none">
             Mata Kuliah
           </span>
-          {user.role !== "USER" && (
+          {user.role !== "MURID" && user.role !== "USER" && (
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}

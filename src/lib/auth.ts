@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 export type AuthUser = {
   userId: string;
   username: string;
-  token: string;
+  fullName: string;
   role: string;
+  profileImageUrl: string;
+  token: string;
 };
 
 const KEY = "pinterq.auth";

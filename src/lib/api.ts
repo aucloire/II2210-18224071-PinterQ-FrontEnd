@@ -25,7 +25,14 @@ export const api = {
     return res.json();
   },
 
-  register: async (username: string, email: string, password: string, role: string = "USER") => {
+  // === CATEGORIES ===
+  getPublicCategories: async () => {
+    const res = await fetch(`${BASE_URL}/categories/public`);
+    if (!res.ok) throw new Error("Gagal mengambil kategori publik");
+    return res.json();
+  },
+
+  register: async (username: string, email: string, password: string, role: string = "MURID") => {
     const res = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -148,6 +155,34 @@ export const api = {
       body: JSON.stringify({ role }),
     });
     if (!res.ok) throw new Error("Gagal mengubah role");
+    return res.json();
+  },
+
+  deleteUser: async (userId: number) => {
+    const res = await fetch(`${BASE_URL}/admin/${userId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal menghapus pengguna");
+    return res.json();
+  },
+
+  // === PROFILE ===
+  getProfile: async (userId: number) => {
+    const res = await fetch(`${BASE_URL}/users/${userId}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil profil");
+    return res.json();
+  },
+
+  updateProfile: async (userId: number, data: { fullName?: string; username?: string; profileImageUrl?: string }) => {
+    const res = await fetch(`${BASE_URL}/users/${userId}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Gagal memperbarui profil");
     return res.json();
   },
 };
