@@ -163,15 +163,15 @@ export function AdminDashboard() {
           </div>
 
           <div className="relative flex-1 max-w-sm">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <Search className="size-4" />
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+              <Search className="size-4.5" />
             </div>
             <input
               type="text"
               placeholder="Cari nama atau username..."
               value={filter}
               onChange={e => setFilter(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+              className="w-full h-11 pl-11 pr-4 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium transition-all"
             />
           </div>
         </div>

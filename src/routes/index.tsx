@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { LogOut, ShieldCheck, UserCheck, Layers, History, User, TrendingUp, UserX, BookOpen, Search, Loader2, BadgeCheck, Ban, Trash2 } from "lucide-react";
+import { LogOut, ShieldCheck, UserCheck, Layers, History, User, TrendingUp, UserX, BookOpen, Search, Loader2, BadgeCheck, Ban, Trash2, Sparkles } from "lucide-react";
 import { getStoredUser, useAuth } from "@/lib/auth";
 import { TeacherDashboard } from "@/components/dashboards/TeacherDashboard";
 import { StudentDashboard } from "@/components/dashboards/StudentDashboard";
@@ -96,11 +96,14 @@ function normalizedRole(role: string): string {
 /* ─── Role Dispatcher ─── */
 
 function RoleBasedDashboard({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
-  if (!user) return null;
+  if (!user || !user.userId) return null;
   const role = normalizedRole(user.role);
   
-  // Extract numeric ID safely (handles "u_123" -> 123)
-  const numericId = Number(user.userId.replace(/\D/g, '')) || 0;
+  // Extract numeric ID safely (handles "u_123" -> 123, or just "123" -> 123)
+  const idStr = String(user.userId);
+  const numericId = idStr.startsWith("u_") 
+    ? 0 // Default for mock/temporary IDs
+    : parseInt(idStr.replace(/\D/g, ''), 10) || 0;
 
   if (role === "SUPERADMIN") {
     return (
