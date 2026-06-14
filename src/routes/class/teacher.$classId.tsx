@@ -226,7 +226,7 @@ function TeacherClassDetailPage() {
                        <Plus className="size-5" /> Tambah Topik Baru
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-xl rounded-[40px] bg-white border-white/20 p-8 shadow-xl">
+                  <DialogContent className="sm:max-w-xl rounded-[40px] bg-background border-white/20 p-8 shadow-xl">
                     <DialogHeader>
                       <DialogTitle className="text-3xl font-black tracking-tight">Buat Topik Baru</DialogTitle>
                       <DialogDescription className="text-base font-medium">Topik adalah wadah untuk Kuis dan Flashcard materi tertentu.</DialogDescription>
@@ -340,7 +340,7 @@ function TeacherClassDetailPage() {
                                           <Plus className="size-4 mr-2" /> Tambah Soal
                                        </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-2xl rounded-[40px] bg-white border-white/20 p-8 shadow-xl">
+                                    <DialogContent className="sm:max-w-2xl rounded-[40px] bg-background border-white/20 p-8 shadow-xl">
                                        <DialogHeader>
                                           <DialogTitle className="text-2xl font-black">Tambah Soal Kuis</DialogTitle>
                                           <DialogDescription className="text-base font-medium">Topik: {data.title}</DialogDescription>
@@ -376,7 +376,7 @@ function TeacherClassDetailPage() {
                                           <Plus className="size-4 mr-2" /> Tambah Flashcard
                                        </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-xl rounded-[40px] bg-white border-white/20 p-8 shadow-xl">
+                                    <DialogContent className="sm:max-w-xl rounded-[40px] bg-background border-white/20 p-8 shadow-xl">
                                        <DialogHeader>
                                           <DialogTitle className="text-2xl font-black">Tambah Flashcard</DialogTitle>
                                           <DialogDescription className="text-base font-medium">Topik: {data.title}</DialogDescription>

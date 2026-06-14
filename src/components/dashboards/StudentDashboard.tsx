@@ -170,7 +170,7 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
                 <Plus className="size-4 mr-2" /> Gabung Kelas
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md rounded-2xl">
+            <DialogContent className="sm:max-w-md rounded-2xl bg-background border-white/20 shadow-xl">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold">Gabung Kelas</DialogTitle>
               </DialogHeader>
@@ -195,7 +195,7 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
                 <Plus className="size-4 mr-2" /> Kategori Baru
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md rounded-2xl">
+            <DialogContent className="sm:max-w-md rounded-2xl bg-background border-white/20 shadow-xl">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold">Tambah Kategori</DialogTitle>
               </DialogHeader>

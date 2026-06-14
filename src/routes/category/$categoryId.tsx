@@ -175,7 +175,7 @@ function CategoryDetailPage() {
                             <Plus className="size-5" /> Materi Baru
                          </button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-xl rounded-[40px] glass-strong border-white/20 p-8">
+                      <DialogContent className="sm:max-w-xl rounded-[40px] bg-background border-white/20 p-8 shadow-xl">
                          <DialogHeader>
                             <DialogTitle className="text-3xl font-black">Tambah Materi</DialogTitle>
                             <DialogDescription className="text-base font-medium">Tempelkan teks materi atau tulis sendiri untuk dipelajari.</DialogDescription>

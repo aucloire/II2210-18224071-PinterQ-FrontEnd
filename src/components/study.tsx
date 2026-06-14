@@ -119,7 +119,7 @@ export function FlashcardCarousel({ cards }: { cards: Flashcard[] }) {
 
       <div className="w-full max-w-xl perspective-1000 h-72 sm:h-80">
         <AnimatePresence mode="wait" initial={false}>
-          <motion.button
+          <motion.div
             key={card.id}
             onClick={() => setFlipped((f) => !f)}
             initial={{ opacity: 0, x: 40 }}
@@ -185,7 +185,7 @@ export function FlashcardCarousel({ cards }: { cards: Flashcard[] }) {
                 <span className="text-xs opacity-70">Tap to flip back ↺</span>
               </div>
             </motion.div>
-          </motion.button>
+          </motion.div>
         </AnimatePresence>
       </div>
 

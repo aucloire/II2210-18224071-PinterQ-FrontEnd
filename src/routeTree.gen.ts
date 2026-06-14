@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CategoryCategoryIdRouteImport } from './routes/category/$categoryId'
 import { Route as StudyQuizIdRouteImport } from './routes/study.quiz.$id'
 import { Route as StudyFlashcardIdRouteImport } from './routes/study.flashcard.$id'
 import { Route as ClassTeacherClassIdRouteImport } from './routes/class/teacher.$classId'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoryCategoryIdRoute = CategoryCategoryIdRouteImport.update({
+  id: '/category/$categoryId',
+  path: '/category/$categoryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudyQuizIdRoute = StudyQuizIdRouteImport.update({
   id: '/study/quiz/$id',
   path: '/study/quiz/$id',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/class/student/$classId': typeof ClassStudentClassIdRoute
   '/class/teacher/$classId': typeof ClassTeacherClassIdRoute
   '/study/flashcard/$id': typeof StudyFlashcardIdRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/class/student/$classId': typeof ClassStudentClassIdRoute
   '/class/teacher/$classId': typeof ClassTeacherClassIdRoute
   '/study/flashcard/$id': typeof StudyFlashcardIdRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
+  '/category/$categoryId': typeof CategoryCategoryIdRoute
   '/class/student/$classId': typeof ClassStudentClassIdRoute
   '/class/teacher/$classId': typeof ClassTeacherClassIdRoute
   '/study/flashcard/$id': typeof StudyFlashcardIdRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/login'
     | '/profile'
+    | '/category/$categoryId'
     | '/class/student/$classId'
     | '/class/teacher/$classId'
     | '/study/flashcard/$id'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/login'
     | '/profile'
+    | '/category/$categoryId'
     | '/class/student/$classId'
     | '/class/teacher/$classId'
     | '/study/flashcard/$id'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/login'
     | '/profile'
+    | '/category/$categoryId'
     | '/class/student/$classId'
     | '/class/teacher/$classId'
     | '/study/flashcard/$id'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
+  CategoryCategoryIdRoute: typeof CategoryCategoryIdRoute
   ClassStudentClassIdRoute: typeof ClassStudentClassIdRoute
   ClassTeacherClassIdRoute: typeof ClassTeacherClassIdRoute
   StudyFlashcardIdRoute: typeof StudyFlashcardIdRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/category/$categoryId': {
+      id: '/category/$categoryId'
+      path: '/category/$categoryId'
+      fullPath: '/category/$categoryId'
+      preLoaderRoute: typeof CategoryCategoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/study/quiz/$id': {
       id: '/study/quiz/$id'
       path: '/study/quiz/$id'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
+  CategoryCategoryIdRoute: CategoryCategoryIdRoute,
   ClassStudentClassIdRoute: ClassStudentClassIdRoute,
   ClassTeacherClassIdRoute: ClassTeacherClassIdRoute,
   StudyFlashcardIdRoute: StudyFlashcardIdRoute,
