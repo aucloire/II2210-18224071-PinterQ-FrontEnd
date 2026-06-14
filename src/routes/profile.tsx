@@ -1,9 +1,17 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, User as UserIcon, Save, Loader2, Camera, X } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  ChevronLeft, User as UserIcon, Save, Loader2, X, Link2, Upload
+} from "lucide-react";
 import { getStoredUser, setStoredUser, useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -33,6 +41,11 @@ function ProfilePage() {
   const [username, setUsername] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Upload modal state
+  const [imageUrl, setImageUrl] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (!ready || !user) return;
@@ -63,8 +76,15 @@ function ProfilePage() {
     }
     setUploading(true);
     try {
-      const base64 = await fileToBase64(file);
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       setProfileImageUrl(base64);
+      setIsOpen(false);
+      setImageUrl("");
     } catch {
       alert("Gagal memproses gambar.");
     } finally {
@@ -72,13 +92,11 @@ function ProfilePage() {
     }
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  const handleUrlSubmit = () => {
+    if (!imageUrl.trim()) return;
+    setProfileImageUrl(imageUrl.trim());
+    setIsOpen(false);
+    setImageUrl("");
   };
 
   const handleUsernameBlur = async () => {
@@ -115,7 +133,6 @@ function ProfilePage() {
           fullName: updated.fullName || updated.username || stripped,
           profileImageUrl: updated.profileImageUrl || "",
         });
-        // Also update the session username so sidebar reflects it
         setStoredUser({ ...stored, username: stripped });
       }
       setSaved(true);
@@ -126,8 +143,6 @@ function ProfilePage() {
       setSaving(false);
     }
   };
-
-  const [errorMsg, setErrorMsg] = useState("");
 
   if (!ready || !user) return null;
 
@@ -161,28 +176,72 @@ function ProfilePage() {
           </div>
         ) : (
           <>
-            {/* Avatar */}
+            {/* Avatar with overlay */}
             <div className="flex justify-center mb-6">
               <div className="relative group">
                 <div
-                  className="size-20 rounded-full border-3 border-white shadow-soft flex items-center justify-center overflow-hidden bg-secondary"
+                  className="w-32 h-32 rounded-full border-4 border-white shadow-soft flex items-center justify-center overflow-hidden bg-secondary"
                   style={profileImageUrl ? { backgroundImage: `url(${profileImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
                 >
-                  {!profileImageUrl && <UserIcon className="size-8 text-muted-foreground/20" />}
+                  {!profileImageUrl && <UserIcon className="w-14 h-14 text-muted-foreground/20" />}
                 </div>
-                {/* Pencil button — always visible, not hover-only */}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="absolute -bottom-1 -right-1 size-7 rounded-full bg-primary flex items-center justify-center shadow-soft hover:brightness-110 active:scale-95 transition disabled:opacity-50"
-                >
-                  {uploading ? (
-                    <Loader2 className="size-3.5 animate-spin text-white" />
-                  ) : (
-                    <Camera className="size-3 text-white" />
-                  )}
-                </button>
+
+                {/* Overlay — hover only */}
+                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="size-9 rounded-full bg-white/90 flex items-center justify-center shadow-lg hover:bg-white active:scale-95 transition disabled:opacity-50"
+                    title="Upload dari perangkat"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </button>
+                  <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                      <button
+                        type="button"
+                        className="size-9 rounded-full bg-white/90 flex items-center justify-center shadow-lg hover:bg-white active:scale-95 transition"
+                        title="Masukkan URL gambar"
+                      >
+                        <Link2 className="w-4 h-4" />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle>URL Gambar Profil</DialogTitle>
+                        <DialogDescription>
+                          Tempel link gambar langsung dari internet (misal Google Drive, Imgur, dll).
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-3">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="avatar-url">Link gambar</Label>
+                          <Input
+                            id="avatar-url"
+                            type="url"
+                            placeholder="https://contoh.com/foto.jpg"
+                            value={imageUrl}
+                            onChange={(e) => setImageUrl(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleUrlSubmit();
+                            }}
+                          />
+                        </div>
+                        <Button onClick={handleUrlSubmit} className="w-full" disabled={!imageUrl.trim()}>
+                          <Link2 className="w-4 h-4 mr-2" />
+                          Gunakan Gambar Ini
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {/* Upload file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -190,14 +249,15 @@ function ProfilePage() {
                   className="hidden"
                   onChange={handleImageUpload}
                 />
+
                 {/* Clear image button */}
                 {profileImageUrl && (
                   <button
                     type="button"
                     onClick={() => setProfileImageUrl("")}
-                    className="absolute -top-1 -left-1 size-5 rounded-full bg-destructive/80 flex items-center justify-center shadow-soft hover:bg-destructive transition opacity-0 group-hover:opacity-100"
+                    className="absolute -top-1.5 -left-1.5 size-6 rounded-full bg-destructive flex items-center justify-center shadow-soft hover:bg-red-600 transition scale-0 group-hover:scale-100"
                   >
-                    <X className="size-2.5 text-white" />
+                    <X className="w-3 h-3 text-white" />
                   </button>
                 )}
               </div>

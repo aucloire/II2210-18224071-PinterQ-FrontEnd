@@ -55,8 +55,10 @@ export function useAuth() {
       const u: AuthUser = {
         userId: `u_${Math.random().toString(36).slice(2, 10)}`,
         username: username.trim() || "Student",
+        fullName: "",
         token: "",
         role: "USER",
+        profileImageUrl: "",
       };
       setStoredUser(u);
       return u;

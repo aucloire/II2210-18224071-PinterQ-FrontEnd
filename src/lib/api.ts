@@ -194,4 +194,77 @@ export const api = {
     if (!res.ok) throw new Error("Gagal cek username");
     return res.json();
   },
+
+  // === CLASSES ===
+  createClass: async (name: string, teacherId: number) => {
+    const res = await fetch(`${BASE_URL}/classes`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ name, teacherId }),
+    });
+    if (!res.ok) throw new Error("Gagal membuat kelas");
+    return res.json();
+  },
+
+  joinClass: async (studentId: number, classCode: string) => {
+    const res = await fetch(`${BASE_URL}/classes/join`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ studentId, classCode }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Gagal bergabung ke kelas");
+    }
+    return res.json();
+  },
+
+  getTeacherClasses: async (teacherId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/my/${teacherId}`);
+    if (!res.ok) throw new Error("Gagal mengambil daftar kelas");
+    return res.json();
+  },
+
+  getClassMembers: async (classId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/${classId}/members`);
+    if (!res.ok) throw new Error("Gagal mengambil anggota kelas");
+    return res.json();
+  },
+
+  getTeacherStudents: async (teacherId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/students/${teacherId}`);
+    if (!res.ok) throw new Error("Gagal mengambil daftar murid");
+    return res.json();
+  },
+
+  getStudentJoinedClasses: async (studentId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/student/${studentId}`);
+    if (!res.ok) throw new Error("Gagal mengambil kelas yang diikuti");
+    return res.json();
+  },
+
+  deleteClass: async (classId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/${classId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal menghapus kelas");
+    return res.json();
+  },
+
+  // === NOTIFICATIONS ===
+  getNotifications: async (userId: number) => {
+    const res = await fetch(`${BASE_URL}/notifications?userId=${userId}`);
+    if (!res.ok) throw new Error("Gagal mengambil notifikasi");
+    return res.json();
+  },
+
+  markNotificationRead: async (notificationId: number) => {
+    const res = await fetch(`${BASE_URL}/notifications/${notificationId}/read`, {
+      method: "PUT",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal menandai notifikasi");
+    return res.json();
+  },
 };
