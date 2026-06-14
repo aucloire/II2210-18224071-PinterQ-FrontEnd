@@ -5,6 +5,7 @@ import { ChevronLeft, FileText, Loader2, BookOpen, Sparkles } from "lucide-react
 import { getStoredUser, useAuth } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { FlashcardCarousel } from "@/components/study";
+import { Button } from "@/components/ui/button";
 import { z } from "zod";
 
 const studySearchSchema = z.object({

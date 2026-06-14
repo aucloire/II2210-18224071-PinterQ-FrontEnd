@@ -35,7 +35,7 @@ function Dashboard() {
   if (!ready || !user) return null;
 
   return (
-    <div className="min-h-screen w-full bg-white">
+    <div className="min-h-screen w-full bg-background">
       {/* Header — Simple & Professional */}
       <header className="px-6 sm:px-10 py-6 flex items-center justify-between max-w-6xl mx-auto border-b border-black/5">
         <div className="flex items-center gap-3">
