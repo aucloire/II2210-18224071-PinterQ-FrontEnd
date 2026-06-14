@@ -130,7 +130,12 @@ function StudyQuizPage() {
             <div className="glass-strong rounded-[40px] p-6 sm:p-10 border border-white/20 shadow-soft">
               <QuizRunner
                 questions={quizzes}
-                onGenerateAdaptive={() => {}}
+                onGenerateAdaptive={(diff) => {
+                   api.generateAdaptive(categoryId!, diff).then(() => {
+                      alert("Soal " + diff + " berhasil ditambahkan!");
+                      window.location.reload();
+                   });
+                }}
                 onComplete={handleComplete}
               />
             </div>
