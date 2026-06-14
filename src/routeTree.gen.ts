@@ -13,10 +13,11 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as ExploreRouteImport } from './routes/explore'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ClassDetailRouteImport } from './routes/class/-$classId'
-import { Route as CategoryDetailRouteImport } from './routes/category/-$categoryId'
+import { Route as StudyQuizIdRouteImport } from './routes/study.quiz.$id'
+import { Route as StudyFlashcardIdRouteImport } from './routes/study.flashcard.$id'
+import { Route as ClassTeacherClassIdRouteImport } from './routes/class/teacher.$classId'
+import { Route as ClassStudentClassIdRouteImport } from './routes/class/student.$classId'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -38,84 +39,112 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClassDetailRoute = ClassDetailRouteImport.update({
-  id: '/class/$classId',
-  path: '/class/$classId',
+const StudyQuizIdRoute = StudyQuizIdRouteImport.update({
+  id: '/study/quiz/$id',
+  path: '/study/quiz/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CategoryDetailRoute = CategoryDetailRouteImport.update({
-  id: '/category/$categoryId',
-  path: '/category/$categoryId',
+const StudyFlashcardIdRoute = StudyFlashcardIdRouteImport.update({
+  id: '/study/flashcard/$id',
+  path: '/study/flashcard/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClassTeacherClassIdRoute = ClassTeacherClassIdRouteImport.update({
+  id: '/class/teacher/$classId',
+  path: '/class/teacher/$classId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClassStudentClassIdRoute = ClassStudentClassIdRouteImport.update({
+  id: '/class/student/$classId',
+  path: '/class/student/$classId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/explore': typeof ExploreRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
-  '/class/$classId': typeof ClassDetailRoute
-  '/category/$categoryId': typeof CategoryDetailRoute
+  '/class/student/$classId': typeof ClassStudentClassIdRoute
+  '/class/teacher/$classId': typeof ClassTeacherClassIdRoute
+  '/study/flashcard/$id': typeof StudyFlashcardIdRoute
+  '/study/quiz/$id': typeof StudyQuizIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/explore': typeof ExploreRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
-  '/class/$classId': typeof ClassDetailRoute
-  '/category/$categoryId': typeof CategoryDetailRoute
+  '/class/student/$classId': typeof ClassStudentClassIdRoute
+  '/class/teacher/$classId': typeof ClassTeacherClassIdRoute
+  '/study/flashcard/$id': typeof StudyFlashcardIdRoute
+  '/study/quiz/$id': typeof StudyQuizIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/explore': typeof ExploreRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
-  '/class/$classId': typeof ClassDetailRoute
-  '/category/$categoryId': typeof CategoryDetailRoute
+  '/class/student/$classId': typeof ClassStudentClassIdRoute
+  '/class/teacher/$classId': typeof ClassTeacherClassIdRoute
+  '/study/flashcard/$id': typeof StudyFlashcardIdRoute
+  '/study/quiz/$id': typeof StudyQuizIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/explore' | '/history' | '/login' | '/profile' | '/class/$classId' | '/category/$categoryId'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/explore' | '/history' | '/login' | '/profile' | '/class/$classId' | '/category/$categoryId'
-  id:
-    | '__root__'
+  fullPaths:
     | '/'
-    | '/admin'
     | '/explore'
     | '/history'
     | '/login'
     | '/profile'
-    | '/class/$classId'
-    | '/category/$categoryId'
+    | '/class/student/$classId'
+    | '/class/teacher/$classId'
+    | '/study/flashcard/$id'
+    | '/study/quiz/$id'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/explore'
+    | '/history'
+    | '/login'
+    | '/profile'
+    | '/class/student/$classId'
+    | '/class/teacher/$classId'
+    | '/study/flashcard/$id'
+    | '/study/quiz/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/explore'
+    | '/history'
+    | '/login'
+    | '/profile'
+    | '/class/student/$classId'
+    | '/class/teacher/$classId'
+    | '/study/flashcard/$id'
+    | '/study/quiz/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
   ExploreRoute: typeof ExploreRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
-  ClassDetailRoute: typeof ClassDetailRoute
-  CategoryDetailRoute: typeof CategoryDetailRoute
+  ClassStudentClassIdRoute: typeof ClassStudentClassIdRoute
+  ClassTeacherClassIdRoute: typeof ClassTeacherClassIdRoute
+  StudyFlashcardIdRoute: typeof StudyFlashcardIdRoute
+  StudyQuizIdRoute: typeof StudyQuizIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -148,13 +177,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -162,18 +184,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/class/$classId': {
-      id: '/class/$classId'
-      path: '/class/$classId'
-      fullPath: '/class/$classId'
-      preLoaderRoute: typeof ClassDetailRouteImport
+    '/study/quiz/$id': {
+      id: '/study/quiz/$id'
+      path: '/study/quiz/$id'
+      fullPath: '/study/quiz/$id'
+      preLoaderRoute: typeof StudyQuizIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/category/$categoryId': {
-      id: '/category/$categoryId'
-      path: '/category/$categoryId'
-      fullPath: '/category/$categoryId'
-      preLoaderRoute: typeof CategoryDetailRouteImport
+    '/study/flashcard/$id': {
+      id: '/study/flashcard/$id'
+      path: '/study/flashcard/$id'
+      fullPath: '/study/flashcard/$id'
+      preLoaderRoute: typeof StudyFlashcardIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/class/teacher/$classId': {
+      id: '/class/teacher/$classId'
+      path: '/class/teacher/$classId'
+      fullPath: '/class/teacher/$classId'
+      preLoaderRoute: typeof ClassTeacherClassIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/class/student/$classId': {
+      id: '/class/student/$classId'
+      path: '/class/student/$classId'
+      fullPath: '/class/student/$classId'
+      preLoaderRoute: typeof ClassStudentClassIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -181,13 +217,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
   ExploreRoute: ExploreRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
-  ClassDetailRoute: ClassDetailRoute,
-  CategoryDetailRoute: CategoryDetailRoute,
+  ClassStudentClassIdRoute: ClassStudentClassIdRoute,
+  ClassTeacherClassIdRoute: ClassTeacherClassIdRoute,
+  StudyFlashcardIdRoute: StudyFlashcardIdRoute,
+  StudyQuizIdRoute: StudyQuizIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
