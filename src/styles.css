@@ -39,47 +39,47 @@
   --color-sage: var(--sage);
   --color-blush: var(--blush);
 
-  --shadow-soft: 0 4px 20px -4px oklch(0.3 0.02 50 / 0.08);
-  --shadow-glow: 0 8px 32px -8px oklch(0.55 0.08 25 / 0.35);
+  --shadow-soft: 0 4px 20px -4px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 8px 32px -8px rgba(37, 99, 235, 0.35);
 }
 
 :root {
-  --radius: 1.25rem;
+  --radius: 0.75rem;
 
-  /* Palette in oklch (converted from hex spec) */
-  --background: oklch(0.892 0.018 75);    /* #E5DFD6 */
-  --foreground: oklch(0.235 0.012 40);    /* #2C2725 */
+  /* Original Palette - Slate & Blue */
+  --background: #ffffff;
+  --foreground: #0f172a;
 
-  --card: oklch(0.96 0.012 80 / 0.6);
-  --card-foreground: var(--foreground);
+  --card: #ffffff;
+  --card-foreground: #0f172a;
 
-  --popover: oklch(0.96 0.012 80);
-  --popover-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
 
-  --primary: oklch(0.55 0.085 25);        /* #AE6965 Blush */
-  --primary-foreground: oklch(0.98 0.005 80);
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
 
-  --secondary: oklch(0.78 0.05 40 / 0.4); /* Oak tint */
-  --secondary-foreground: var(--foreground);
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
 
-  --muted: oklch(0.85 0.015 75);
-  --muted-foreground: oklch(0.42 0.018 40);
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
 
-  --accent: oklch(0.78 0.04 20 / 0.5);    /* Rose tint */
-  --accent-foreground: var(--foreground);
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
 
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0.005 80);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.78 0.025 60 / 0.4);
-  --input: oklch(0.96 0.012 80 / 0.7);
-  --ring: oklch(0.55 0.085 25 / 0.5);
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
 
-  /* Named accents */
-  --oak: oklch(0.65 0.045 60);            /* #A58B71 */
-  --rose: oklch(0.78 0.045 20);           /* #D1A9A5 */
-  --sage: oklch(0.55 0.035 130);          /* #7A816C */
-  --blush: oklch(0.55 0.085 25);          /* #AE6965 */
+  /* Named accents (Original mappings) */
+  --oak: #64748b;
+  --rose: #f43f5e;
+  --sage: #10b981;
+  --blush: #2563eb;
 }
 
 @layer base {
@@ -88,10 +88,6 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    background-image:
-      radial-gradient(ellipse at top left, oklch(0.78 0.045 20 / 0.25), transparent 50%),
-      radial-gradient(ellipse at bottom right, oklch(0.55 0.035 130 / 0.18), transparent 50%);
-    background-attachment: fixed;
     min-height: 100vh;
   }
   h1, h2, h3 { letter-spacing: -0.03em; font-weight: 700; }
@@ -99,14 +95,16 @@
 
 @layer utilities {
   .glass {
-    background-color: oklch(1 0 0 / 0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   .glass-strong {
-    background-color: oklch(1 0 0 / 0.7);
+    background-color: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
   .perspective-1000 { perspective: 1000px; }
   .preserve-3d { transform-style: preserve-3d; }
@@ -119,10 +117,10 @@
     background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: oklch(0.235 0.012 40 / 0.1);
+    background: rgba(15, 23, 42, 0.1);
     border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.235 0.012 40 / 0.2);
+    background: rgba(15, 23, 42, 0.2);
   }
 }

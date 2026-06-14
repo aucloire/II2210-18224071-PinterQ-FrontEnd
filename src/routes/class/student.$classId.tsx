@@ -106,7 +106,7 @@ function StudentClassDetailPage() {
   if (!ready || !user) return null;
 
   return (
-    <div className="min-h-screen w-full bg-[#FBF9F6]">
+    <div className="min-h-screen w-full bg-background">
       {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between glass-strong rounded-[24px] px-6 h-16 shadow-soft border border-white/20">
