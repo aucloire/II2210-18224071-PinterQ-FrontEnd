@@ -60,11 +60,12 @@ function CategoryDetailPage() {
     setLoading(true);
     const studentId = Number(user.userId);
     try {
-      const [allCats, flashcardsData, quizzesData, historyData] = await Promise.all([
+      const [allCats, flashcardsData, quizzesData, historyData, materialsData] = await Promise.all([
         api.getCategories(studentId),
         api.getFlashcards(catIdNum),
         api.getQuizzes(catIdNum),
-        api.getQuizHistory(studentId)
+        api.getQuizHistory(studentId),
+        api.getMaterials(catIdNum)
       ]);
 
       const found = (Array.isArray(allCats) ? allCats : []).find((c: any) => c.id === catIdNum);
@@ -72,6 +73,11 @@ function CategoryDetailPage() {
 
       const groups: Record<number, { id: number; title: string; quizzes: any[]; flashcards: any[]; bestScore?: number }> = {};
       
+      // Initialize groups with materials
+      (Array.isArray(materialsData) ? materialsData : []).forEach((m: any) => {
+        groups[m.id] = { id: m.id, title: m.title, quizzes: [], flashcards: [] };
+      });
+
       (Array.isArray(quizzesData) ? quizzesData : []).forEach((q: any) => {
         const mId = q.material?.id;
         if (!mId) return;

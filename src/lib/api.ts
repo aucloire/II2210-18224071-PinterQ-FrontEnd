@@ -165,6 +165,12 @@ export const api = {
     return res.json();
   },
 
+  getMaterials: async (categoryId: number) => {
+    const res = await fetch(`${BASE_URL}/study/materials/${categoryId}`);
+    if (!res.ok) throw new Error("Gagal mengambil materi");
+    return res.json();
+  },
+
   // === QUIZ SUBMISSION ===
   submitQuizAttempt: async (userId: number, materialId: number, score: number) => {
     const res = await fetch(`${BASE_URL}/study/submit-attempt`, {
