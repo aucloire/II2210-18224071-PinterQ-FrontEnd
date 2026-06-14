@@ -1,11 +1,11 @@
 import { createFileRoute, redirect, useNavigate, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { LogOut, ShieldCheck, UserCheck, Layers, History, User, BookOpen } from "lucide-react";
+import { LogOut, ShieldCheck, UserCheck, User, BookOpen, Bell } from "lucide-react";
 import { getStoredUser, useAuth } from "@/lib/auth";
 import { AdminDashboard } from "@/components/dashboards/AdminDashboard";
 import { TeacherDashboard } from "@/components/dashboards/TeacherDashboard";
 import { StudentDashboard } from "@/components/dashboards/StudentDashboard";
-import { Card, CardContent } from "@/components/ui/card";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -43,6 +43,9 @@ function Dashboard() {
         </div>
 
         <nav className="flex items-center gap-2 sm:gap-3">
+          {/* Notification Bell */}
+          <NotificationDropdown userId={user.userId} />
+
           <Link to="/profile" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft">
             {user.profileImageUrl ? (
               <img src={user.profileImageUrl} alt="avatar" className="size-4 rounded-full object-cover" />
@@ -51,18 +54,6 @@ function Dashboard() {
             )}
             <span className="hidden sm:inline">Profil</span>
           </Link>
-
-          <Link to="/history" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft">
-            <History className="size-3.5" />
-            <span className="hidden sm:inline">Riwayat</span>
-          </Link>
-
-          {normalizedRole(user.role) === "MURID" && (
-            <Link to="/explore" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft text-primary">
-              <Layers className="size-3.5" />
-              <span className="hidden sm:inline">Jelajahi</span>
-            </Link>
-          )}
 
           {normalizedRole(user.role) === "SUPERADMIN" && (
             <Link to="/admin" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft text-primary">
@@ -81,53 +72,24 @@ function Dashboard() {
         </nav>
       </header>
 
-      {/* Role-Based Dashboard Content */}
-      <section className="max-w-6xl mx-auto pt-12 pb-10">
-        {normalizedRole(user.role) === "SUPERADMIN" && (
-          <RoleBanner user={user} />
-        )}
-        {normalizedRole(user.role) === "MURID" && (
-          <RoleBanner user={user} />
-        )}
-        {normalizedRole(user.role) === "GURU" && (
-          <RoleBanner user={user} />
-        )}
+      {/* Natural Greeting — no box */}
+      <section className="max-w-6xl mx-auto pt-12 pb-4">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+            Halo, {user.fullName || user.username}! 👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1 font-medium">
+            {normalizedRole(user.role) === "SUPERADMIN" && "Kelola pengguna dan setelan platform."}
+            {normalizedRole(user.role) === "GURU" && "Kelola kelas dan materi ajar kamu."}
+            {normalizedRole(user.role) === "MURID" && "Mau belajar apa hari ini?"}
+          </p>
+        </motion.div>
       </section>
 
       <section className="max-w-6xl mx-auto pb-10">
         <RoleBasedDashboard user={user} />
       </section>
     </main>
-  );
-}
-
-function RoleBanner({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
-  if (!user) return null;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-    >
-      <Card className="bg-gradient-to-r border-0 shadow-sm mb-8">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="size-16 rounded-full border-4 border-white shadow-soft flex items-center justify-center overflow-hidden"
-              style={user.profileImageUrl ? { backgroundImage: `url(${user.profileImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : { backgroundColor: "var(--color-secondary)" }}>
-              {!user.profileImageUrl && <User className="size-8 text-muted-foreground/20" />}
-            </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Selamat datang, {user.fullName || user.username}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Role: <span className="font-bold">{user.role}</span>
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
   );
 }
 

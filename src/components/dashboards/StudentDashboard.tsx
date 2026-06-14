@@ -155,12 +155,8 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
 
   return (
     <div className="space-y-8">
-      {/* Welcome */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold">Halo, {studentName}! 👋</h2>
-          <p className="text-sm text-muted-foreground">Pilih kelas atau mulai belajar mandiri</p>
-        </div>
+      {/* Join Class Button */}
+      <div className="flex justify-end">
         <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90 text-sm">
