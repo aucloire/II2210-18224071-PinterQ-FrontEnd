@@ -65,7 +65,6 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
     loadSelfStudyCategories();
   }, [studentId]);
 
-  // Load all classes (not just joined) — will need a backend endpoint
   const loadJoinedClasses = async () => {
     setClassesLoading(true);
     try {
@@ -82,7 +81,6 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
     setSelfLoading(true);
     try {
       const cats = await api.getCategories(studentId);
-      // Filter: only show categories WITHOUT classGroupId (self-study only)
       setSelfStudyCategories(cats);
     } catch (err) {
       console.error(err);
@@ -122,50 +120,74 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
   };
 
   return (
-    <div className="space-y-8">
-      {/* Tab Switcher */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2 p-1 glass-strong rounded-xl inline-flex">
+    <div className="space-y-12">
+      {/* Tab Switcher & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex p-1 glass-strong rounded-[18px] shadow-soft border border-white/20 w-fit">
           <button
             onClick={() => setActiveTab("class")}
-            className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
               activeTab === "class" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Kelas Saya
+            Ruang Kelas
           </button>
           <button
             onClick={() => setActiveTab("self")}
-            className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
               activeTab === "self" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Self-Study
+            Belajar Mandiri
           </button>
         </div>
 
-        {/* Join class button only visible on Kelas Saya tab */}
-        {activeTab === "class" && (
+        {activeTab === "class" ? (
           <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90 text-sm ml-3">
-                <Plus className="size-4 mr-1.5" /> Bergabung ke Kelas
-              </Button>
+              <button className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-soft hover:brightness-105 transition-all">
+                <Plus className="size-4" /> Gabung Kelas
+              </button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-sm">
+            <DialogContent className="sm:max-w-sm rounded-[32px] border-white/20 glass-strong">
               <DialogHeader>
-                <DialogTitle>Bergabung ke Kelas</DialogTitle>
+                <DialogTitle className="text-2xl font-black text-center">Gabung Kelas</DialogTitle>
               </DialogHeader>
-              <div className="space-y-3">
+              <div className="space-y-4 pt-4 text-center">
                 <Input
-                  placeholder="Masukkan kode kelas"
+                  placeholder="MASUKKAN KODE KELAS"
                   value={joinCode}
                   onChange={e => setJoinCode(e.target.value.toUpperCase())}
                   onKeyDown={e => e.key === "Enter" && handleJoinClass()}
+                  className="h-14 rounded-2xl border-black/5 bg-white text-center font-mono text-xl font-black tracking-[0.3em] focus:ring-sage/20 uppercase"
                 />
-                <Button onClick={handleJoinClass} disabled={!joinCode.trim() || joining} className="w-full">
-                  {joining ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <ArrowRight className="size-4 mr-1.5" />}
-                  Gabung Kelas
+                <Button onClick={handleJoinClass} disabled={!joinCode.trim() || joining} className="w-full h-12 rounded-xl bg-primary font-black uppercase tracking-widest shadow-soft">
+                  {joining ? <Loader2 className="size-4 animate-spin" /> : "GABUNG SEKARANG"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <Dialog open={createCatOpen} onOpenChange={setCreateCatOpen}>
+            <DialogTrigger asChild>
+              <button className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-sage text-white font-black text-[10px] uppercase tracking-widest shadow-soft hover:brightness-105 transition-all">
+                <Plus className="size-4" /> Kategori Baru
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm rounded-[32px] border-white/20 glass-strong">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-black">Tambah Kategori</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <Input
+                  placeholder="Nama materi (cth: Struktur Data)"
+                  value={newCatName}
+                  onChange={e => setNewCatName(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleCreateCategory()}
+                  className="h-12 rounded-xl border-black/5 bg-white font-bold"
+                />
+                <Button onClick={handleCreateCategory} disabled={!newCatName.trim() || creating} className="w-full h-12 rounded-xl bg-sage text-white font-black uppercase tracking-widest">
+                  {creating ? <Loader2 className="size-4 animate-spin" /> : "TAMBAH"}
                 </Button>
               </div>
             </DialogContent>
@@ -178,48 +200,56 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
         {activeTab === "class" && (
           <motion.section
             key="classes"
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.15 }}
-            className="space-y-3"
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
           >
             {classesLoading ? (
-              <div className="flex justify-center py-16"><Loader2 className="size-7 animate-spin text-primary/30" /></div>
+              <div className="flex justify-center py-24"><Loader2 className="size-8 animate-spin text-primary/30" /></div>
             ) : joinedClasses.length === 0 ? (
-              <div className="text-center py-16 glass rounded-2xl border border-dashed">
-                <BookOpen className="size-10 mx-auto text-muted-foreground/10 mb-3" />
-                <h3 className="text-sm font-bold text-muted-foreground/30 italic">Belum bergabung di kelas manapun</h3>
-                <p className="text-xs text-muted-foreground mt-1">Gunakan kode kelas dari guru untuk bergabung</p>
+              <div className="text-center py-24 glass rounded-[40px] border border-dashed border-border/50">
+                <BookOpen className="size-16 mx-auto text-muted-foreground/10 mb-4" />
+                <h3 className="text-base font-bold text-muted-foreground/40 italic">Belum ada kelas yang diikuti</h3>
+                <p className="text-xs text-muted-foreground/30 mt-1">Gunakan kode dari gurumu untuk bergabung</p>
               </div>
             ) : (
-              joinedClasses.map(cls => (
-                <Link
-                  key={cls.id}
-                  to="/class/student/$classId"
-                  params={{ classId: String(cls.id) }}
-                  className="block group"
-                >
-                  <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-2xl overflow-hidden">
-                    <CardContent className="p-5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-base leading-tight">{cls.name}</h3>
-                          <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1.5 font-bold uppercase tracking-widest">
-                            Kode: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-primary">{cls.classCode}</code>
-                          </p>
-                          <p className="text-[11px] text-muted-foreground mt-2 font-medium flex items-center gap-1.5">
-                            <UsersRound className="size-3.5" /> {cls.memberCount} murid bergabung
-                          </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {joinedClasses.map(cls => (
+                  <Link
+                    key={cls.id}
+                    to="/class/student/$classId"
+                    params={{ classId: String(cls.id) }}
+                    className="block group"
+                  >
+                    <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-[28px] overflow-hidden">
+                      <CardContent className="p-7">
+                         <div className="flex items-center justify-between mb-6">
+                            <div className="size-12 rounded-2xl bg-sage/10 flex items-center justify-center text-sage group-hover:scale-110 transition-transform">
+                               <BookOpen className="size-6" />
+                            </div>
+                            <span className="text-[10px] font-black bg-secondary/30 px-2 py-0.5 rounded-md uppercase tracking-widest text-primary">Aktif</span>
+                         </div>
+
+                        <h3 className="font-black text-xl leading-tight mb-2 group-hover:text-primary transition-colors">{cls.name}</h3>
+                        
+                        <p className="text-[11px] text-muted-foreground font-medium flex items-center gap-2 mb-8">
+                          <UsersRound className="size-3.5 text-sage" /> {cls.memberCount} Teman Belajar
+                        </p>
+
+                        <div className="flex items-center justify-between">
+                           <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.15em]">
+                              Kode: <span className="text-primary font-mono">{cls.classCode}</span>
+                           </div>
+                           <div className="size-9 rounded-full bg-primary flex items-center justify-center text-white shadow-soft group-hover:translate-x-1 transition-transform">
+                              <ArrowRight className="size-4" />
+                           </div>
                         </div>
-                        <div className="inline-flex items-center justify-center px-4 h-8 rounded-lg bg-primary text-white font-black text-[9px] uppercase tracking-widest shadow-soft group-hover:scale-105 transition">
-                          Lihat Detail
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
             )}
           </motion.section>
         )}
@@ -228,52 +258,21 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
         {activeTab === "self" && (
           <motion.section
             key="self"
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.15 }}
-            className="space-y-4"
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-8"
           >
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold flex items-center gap-1.5 uppercase tracking-widest text-muted-foreground">
-                <Sparkles className="size-4 text-primary" />
-                Kategori Saya
-              </h3>
-              <Dialog open={createCatOpen} onOpenChange={setCreateCatOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-white text-[10px] font-black uppercase tracking-widest h-8 px-4 rounded-lg shadow-soft">
-                    <Plus className="size-3.5 mr-1" /> Tambah Kategori
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-sm">
-                  <DialogHeader>
-                    <DialogTitle>Kategori Self-Study Baru</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-3">
-                    <Input
-                      placeholder="Nama kategori (cth. Algoritma)"
-                      value={newCatName}
-                      onChange={e => setNewCatName(e.target.value)}
-                      onKeyDown={e => e.key === "Enter" && handleCreateCategory()}
-                    />
-                    <Button onClick={handleCreateCategory} disabled={!newCatName.trim() || creating} className="w-full">
-                      {creating ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <Plus className="size-4 mr-1.5" />}
-                      Tambah
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-
             {selfLoading ? (
-              <div className="flex justify-center py-12"><Loader2 className="size-6 animate-spin text-primary/30" /></div>
+              <div className="flex justify-center py-24"><Loader2 className="size-8 animate-spin text-primary/30" /></div>
             ) : selfStudyCategories.length === 0 ? (
-              <div className="text-center py-12 glass rounded-2xl border border-dashed">
-                <Sparkles className="size-8 mx-auto text-muted-foreground/10 mb-2" />
-                <p className="text-xs text-muted-foreground/30">Belum ada kategori self-study</p>
+              <div className="text-center py-24 glass rounded-[40px] border border-dashed border-border/50">
+                <Sparkles className="size-16 mx-auto text-muted-foreground/10 mb-4" />
+                <p className="text-sm font-bold text-muted-foreground/40 italic">Mulai perjalanan belajar mandirimu</p>
+                <p className="text-xs text-muted-foreground/30 mt-1">Buat kategori pertama untuk mengumpulkan materi</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {selfStudyCategories.map(cat => (
                   <Link
                     key={cat.id}
@@ -281,14 +280,17 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
                     params={{ categoryId: String(cat.id) }}
                     className="block group"
                   >
-                    <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-2xl overflow-hidden">
-                      <CardContent className="p-4">
+                    <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-[24px] overflow-hidden border-b-4 border-sage/20">
+                      <CardContent className="p-6">
                         <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-bold text-sm">{cat.name}</h3>
+                          <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-xl bg-sage/10 flex items-center justify-center text-sage">
+                              <Layers className="size-5" />
+                            </div>
+                            <h3 className="font-black text-lg group-hover:text-primary transition-colors">{cat.name}</h3>
                           </div>
-                          <div className="inline-flex items-center justify-center px-4 h-8 rounded-lg border border-primary/20 text-primary font-black text-[9px] uppercase tracking-widest group-hover:bg-primary group-hover:text-white transition-all">
-                            Lihat Detail
+                          <div className="size-8 rounded-full glass flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-white transition-all">
+                            <ArrowRight className="size-4" />
                           </div>
                         </div>
                       </CardContent>

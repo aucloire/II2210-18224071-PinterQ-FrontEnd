@@ -110,65 +110,65 @@ export function AdminDashboard() {
   );
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-16">
       {/* Title */}
-      <div className="flex items-center gap-3">
-        <div className="size-10 rounded-2xl bg-primary flex items-center justify-center shadow-soft text-white">
-          <ShieldCheck className="size-5" />
+      <div className="flex items-center gap-4">
+        <div className="size-14 rounded-2xl bg-primary flex items-center justify-center shadow-soft text-white shrink-0">
+          <ShieldCheck className="size-7" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Manajemen Pengguna & Platform</p>
+          <h2 className="text-3xl font-black tracking-tight">Manajemen Platform</h2>
+          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mt-1">Kontrol Pengguna & Hak Akses Sistem</p>
         </div>
       </div>
 
-      {/* Stats — 3 box side-by-side */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <StatCard
           title="Total Pengguna"
           value={allUsersCount}
-          icon={<Users className="size-5" />}
+          icon={<Users className="size-6" />}
           color="text-blue-600 bg-blue-50"
         />
         <StatCard
           title="Menunggu Persetujuan"
           value={pendingCount}
-          icon={<UserX className="size-5" />}
+          icon={<UserX className="size-6" />}
           color="text-amber-600 bg-amber-50"
         />
         <StatCard
           title="Murid Aktif"
           value={studentCount}
-          icon={<TrendingUp className="size-5" />}
+          icon={<TrendingUp className="size-6" />}
           color="text-green-600 bg-green-50"
         />
       </div>
 
       {/* User Management Section */}
-      <section>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
-          <div className="flex p-1 glass-strong rounded-xl shadow-soft border border-white/20 w-fit">
+      <section className="space-y-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
+          <div className="flex p-1.5 glass-strong rounded-[20px] shadow-soft border border-white/20 w-fit">
             <button
               onClick={() => setActiveTab("pending")}
-              className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "pending" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "pending" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
             >
               Pending ({pendingCount})
             </button>
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "all" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "all" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:text-foreground"}`}
             >
-              Semua User
+              Semua Database User
             </button>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <div className="relative group flex-1 max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
-              placeholder="Cari pengguna..."
+              placeholder="Cari nama atau username..."
               value={filter}
               onChange={e => setFilter(e.target.value)}
-              className="pl-9 w-full sm:w-64 h-10 rounded-xl text-xs font-medium border-black/5 bg-white/50"
+              className="pl-12 w-full h-14 rounded-[22px] text-sm font-bold border-black/5 bg-white shadow-soft focus:ring-sage/20 transition-all"
             />
           </div>
         </div>
@@ -297,7 +297,7 @@ function StatCard({ title, value, icon, color }: {
   return (
     <Card className="border-0 shadow-soft bg-white/50 backdrop-blur-sm">
       <CardContent className="p-5 flex items-center gap-4">
-        <div className={`size-12 rounded-2xl flex items-center justify-center shadow-sm ${color}`}>
+        <div className={`size-14 rounded-2xl flex items-center justify-center shadow-sm ${color}`}>
           {icon}
         </div>
         <div>

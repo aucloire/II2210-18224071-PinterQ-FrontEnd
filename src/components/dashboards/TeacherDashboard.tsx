@@ -26,7 +26,6 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
   const [createClassOpen, setCreateClassOpen] = useState(false);
   const [newClassName, setNewClassName] = useState("");
   const [creating, setCreating] = useState(false);
-  const [classMembers, setClassMembers] = useState<Record<number, any[]>>({});
 
   useEffect(() => {
     if (!teacherId) return;
@@ -70,22 +69,6 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
     }
   };
 
-  const loadMembers = async (classId: number) => {
-    if (classMembers[classId]) return;
-    try {
-      const members = await api.getClassMembers(classId);
-      setClassMembers(prev => ({ ...prev, [classId]: members }));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-  };
-
-  const totalStudents = Object.values(classMembers).flat().length;
-
   if (loading) {
     return (
       <div className="flex justify-center py-24">
@@ -95,113 +78,120 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Stats — 3 box side-by-side */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard title="Total Kelas" value={classes.length} icon={<BookOpen className="size-5" />} color="text-blue-600 bg-blue-50" />
-        <StatCard title="Total Murid" value={totalStudents} icon={<UsersRound className="size-5" />} color="text-green-600 bg-green-50" />
-        <StatCard title="Rata-rata Nilai" value="-" icon={<Award className="size-5" />} color="text-purple-600 bg-purple-50" />
-      </div>
+    <div className="space-y-16">
+      {/* Title & Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
+        <div className="flex items-center gap-4">
+          <div className="size-12 rounded-2xl bg-primary flex items-center justify-center shadow-soft text-white shrink-0">
+            <BookOpen className="size-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-foreground">Ruang Kelas</h2>
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">Kelola Pengajaran & Materi</p>
+          </div>
+        </div>
 
-      {/* Kelas Saya Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          <BookOpen className="size-5 text-blue-600" />
-          Kelas Saya
-        </h2>
         <Dialog open={createClassOpen} onOpenChange={setCreateClassOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-white text-sm">
-              <Plus className="size-4 mr-1.5" /> Buat Kelas Baru
-            </Button>
+            <button className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-2xl bg-primary text-white font-black text-xs uppercase tracking-widest shadow-glow hover:brightness-105 active:scale-95 transition-all">
+              <Plus className="size-4" />
+              Buat Kelas Baru
+            </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-sm">
+          <DialogContent className="sm:max-w-[425px] rounded-[32px] border-white/20 glass-strong">
             <DialogHeader>
-              <DialogTitle>Buat Kelas Baru</DialogTitle>
+              <DialogTitle className="text-2xl font-black">Buat Kelas</DialogTitle>
+              <DialogDescription className="text-sm font-medium">Berikan nama untuk kelas baru Anda.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-3">
-              <Input
-                placeholder="Nama kelas (cth. Informatika A)"
-                value={newClassName}
-                onChange={e => setNewClassName(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleCreateClass()}
-              />
-              <Button onClick={handleCreateClass} disabled={!newClassName.trim() || creating} className="w-full">
-                {creating ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <Plus className="size-4 mr-1.5" />}
-                Buat Kelas
+            <div className="space-y-6 pt-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Nama Kelas</label>
+                <Input
+                  placeholder="Contoh: Pemrograman Java Lanjut"
+                  value={newClassName}
+                  onChange={(e) => setNewClassName(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleCreateClass()}
+                  className="h-12 rounded-2xl border-black/5 bg-white/50 text-sm font-bold focus:ring-sage/20 transition-all"
+                />
+              </div>
+              <Button 
+                onClick={handleCreateClass} 
+                disabled={!newClassName.trim() || creating}
+                className="w-full h-12 rounded-2xl bg-primary text-white font-black uppercase tracking-widest shadow-soft"
+              >
+                {creating ? <Loader2 className="size-4 animate-spin" /> : "Buat Sekarang"}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Class List */}
-      {classes.length === 0 && (
-        <div className="text-center py-16 glass rounded-2xl border border-dashed">
-          <BookOpen className="size-10 mx-auto text-muted-foreground/10 mb-3" />
-          <h3 className="text-sm font-bold text-muted-foreground/30 italic">Belum ada kelas</h3>
-          <p className="text-xs text-muted-foreground mt-1">Buat kelas pertama untuk mulai mengajar</p>
+      {/* Class Cards */}
+      <section className="space-y-8">
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sage">Daftar Kelas</span>
+          <div className="h-px flex-1 bg-black/5"></div>
         </div>
-      )}
 
-      <div className="space-y-3">
-        {classes.map(cls => (
-          <motion.div
-            key={cls.id}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white/60 p-4 rounded-2xl border border-black/5"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="font-bold text-base">{cls.name}</h3>
-                <p className="text-xs text-muted-foreground">
-                  Kode Kelas: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-xs">{cls.classCode}</code>
-                </p>
-              </div>
-              <Button size="sm" variant="ghost" onClick={() => handleCopyCode(cls.classCode)}
-                className="text-muted-foreground hover:text-foreground">
-                <Copy className="size-3.5 mr-1" /> Copy Kode
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <UsersRound className="size-4" />
-                <span>{cls.memberCount} murid</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/class/teacher/$classId"
-                  params={{ classId: cls.id.toString() }}
-                  className="inline-flex items-center justify-center px-4 h-9 rounded-xl border border-primary/30 text-primary font-bold text-[10px] uppercase tracking-widest hover:bg-primary/5 active:scale-95 transition"
+        {classes.length === 0 ? (
+          <div className="text-center py-24 glass rounded-[40px] border border-dashed border-border/50">
+            <BookOpen className="size-16 mx-auto text-muted-foreground/10 mb-4" />
+            <h3 className="text-base font-bold text-muted-foreground/40 italic">Belum ada kelas yang dibuat</h3>
+            <p className="text-xs text-muted-foreground/30 mt-1">Klik tombol di atas untuk mulai mengajar</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {classes.map((cls) => (
+                <motion.div
+                  key={cls.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
                 >
-                  Lihat Detail <ArrowRight className="size-3 ml-1" />
-                </Link>
-                <Button size="sm" variant="ghost" onClick={() => handleDeleteClass(cls.id)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50">
-                  <Trash2 className="size-3.5" />
-                </Button>
-              </div>
-            </div>
+                  <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all rounded-[32px] overflow-hidden group">
+                    <CardContent className="p-8">
+                      <div className="flex items-start justify-between mb-8">
+                        <div className="size-14 rounded-2xl bg-sage/10 flex items-center justify-center text-sage">
+                           <BookOpen className="size-7" />
+                        </div>
+                        <div className="text-right">
+                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Kode Kelas</p>
+                           <p className="text-lg font-mono font-black text-primary">{cls.classCode}</p>
+                        </div>
+                      </div>
 
-            {/* Quick Members Preview */}
-            {classMembers[cls.id]?.length > 0 && (
-              <details className="text-xs mt-3">
-                <summary className="cursor-pointer font-medium text-muted-foreground">Lihat murid ({classMembers[cls.id].length})</summary>
-                <ul className="mt-1 space-y-1 pl-2 border-l-2 border-gray-200">
-                  {classMembers[cls.id].map((m: any) => (
-                    <li key={m.id} className="text-muted-foreground">
-                      @{m.username} — {m.fullName || "-"}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-          </motion.div>
-        ))}
-      </div>
+                      <h3 className="text-xl font-black tracking-tight mb-2 line-clamp-1">{cls.name}</h3>
+                      
+                      <div className="flex items-center gap-2 text-muted-foreground mb-10">
+                        <UsersRound className="size-4" />
+                        <span className="text-xs font-bold uppercase tracking-wider">{cls.memberCount} Murid Bergabung</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Link
+                          to="/class/teacher/$classId"
+                          params={{ classId: cls.id.toString() }}
+                          className="flex-1 inline-flex items-center justify-center px-6 h-11 rounded-xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-soft hover:brightness-105 active:scale-95 transition"
+                        >
+                          Lihat Detail <ArrowRight className="size-3.5 ml-2" />
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteClass(cls.id)}
+                          className="size-11 flex items-center justify-center rounded-xl glass border border-destructive/10 text-destructive hover:bg-destructive/5 transition"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

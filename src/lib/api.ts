@@ -83,16 +83,53 @@ export const api = {
     return res.text();
   },
 
-  // === GET MATERI ===
-  getFlashcards: async (categoryId: number) => {
-    const res = await fetch(`${BASE_URL}/study/flashcards/${categoryId}`);
-    if (!res.ok) throw new Error("Gagal mengambil flashcard");
+  // === MATERI (TOPICS) ===
+  createMaterial: async (userId: number, categoryId: number, title: string, content: string) => {
+    const res = await fetch(`${BASE_URL}/study/materials`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ userId, categoryId, title, content }),
+    });
+    if (!res.ok) throw new Error("Gagal membuat materi");
     return res.json();
   },
 
-  getQuizzes: async (categoryId: number) => {
-    const res = await fetch(`${BASE_URL}/study/quizzes/${categoryId}`);
-    if (!res.ok) throw new Error("Gagal mengambil quiz");
+  updateMaterial: async (materialId: number, data: { title?: string; content?: string }) => {
+    const res = await fetch(`${BASE_URL}/study/materials/${materialId}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Gagal memperbarui materi");
+    return res.json();
+  },
+
+  deleteMaterial: async (materialId: number) => {
+    const res = await fetch(`${BASE_URL}/study/materials/${materialId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal menghapus materi");
+    return res.json();
+  },
+
+  // === QUIZZES CRUD ===
+  createQuiz: async (materialId: number, data: any) => {
+    const res = await fetch(`${BASE_URL}/study/quizzes`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ materialId, ...data }),
+    });
+    if (!res.ok) throw new Error("Gagal membuat kuis");
+    return res.json();
+  },
+
+  deleteQuiz: async (quizId: number) => {
+    const res = await fetch(`${BASE_URL}/study/quizzes/${quizId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal menghapus kuis");
     return res.json();
   },
 
