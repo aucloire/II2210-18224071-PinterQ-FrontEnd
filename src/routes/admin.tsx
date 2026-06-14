@@ -161,7 +161,7 @@ function AdminPage() {
                         <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.1em] ${
                           u.role === "SUPERADMIN" ? "bg-purple-100 text-purple-700" :
                           u.role === "GURU" ? "bg-blue-100 text-blue-700" :
-                          u.role === "MURID" ? "bg-green-100 text-green-700" : "bg-oak/10 text-oak"
+                          "bg-green-100 text-green-700"
                         }`}>
                           {u.role}
                         </span>

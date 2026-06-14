@@ -182,7 +182,16 @@ export const api = {
       headers: authHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Gagal memperbarui profil");
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Gagal memperbarui profil");
+    }
+    return res.json();
+  },
+
+  checkUsernameAvailability: async (username: string) => {
+    const res = await fetch(`${BASE_URL}/users/check-username?username=${encodeURIComponent(username)}`);
+    if (!res.ok) throw new Error("Gagal cek username");
     return res.json();
   },
 };
