@@ -94,8 +94,13 @@ function CategoryDetailPage() {
         }
       });
 
+      const categoryMaterialIds = Object.keys(groups).map(Number);
+      const categoryHistory = (Array.isArray(historyData) ? historyData : []).filter(h => 
+        categoryMaterialIds.includes(h.materialId)
+      );
+
       setGroupedMaterials(groups);
-      setHistory(Array.isArray(historyData) ? historyData : []);
+      setHistory(categoryHistory);
     } catch (err) {
       console.error(err);
     } finally {
@@ -197,29 +202,31 @@ function CategoryDetailPage() {
             </motion.div>
           </section>
 
-          {/* Adaptive Actions */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-             <div className="p-8 rounded-[32px] bg-white border border-black/5 shadow-soft flex flex-col gap-6 group hover:border-primary/20 transition-all">
-                <div className="size-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                   <Target className="size-7" />
-                </div>
-                <div>
-                   <h3 className="text-xl font-black">Level Up: HOTS</h3>
-                   <p className="text-sm text-muted-foreground mt-1 font-medium">Generate soal tantangan berpikir kritis dari materi terakhir.</p>
-                </div>
-                <Button onClick={() => onGenerateAdaptive("HOTS")} className="w-full h-12 rounded-xl bg-primary font-black uppercase tracking-widest">Generate HOTS</Button>
-             </div>
-             <div className="p-8 rounded-[32px] bg-sage/5 border border-sage/10 shadow-soft flex flex-col gap-6 group hover:border-sage/30 transition-all">
-                <div className="size-14 rounded-2xl bg-sage/10 text-sage flex items-center justify-center group-hover:scale-110 transition-transform">
-                   <Zap className="size-7" />
-                </div>
-                <div>
-                   <h3 className="text-xl font-black text-sage">Fundamental</h3>
-                   <p className="text-sm text-muted-foreground mt-1 font-medium">Perkuat konsep dasar jika kamu merasa masih kesulitan.</p>
-                </div>
-                <Button onClick={() => onGenerateAdaptive("DASAR")} variant="outline" className="w-full h-12 rounded-xl border-sage/20 text-sage font-black uppercase tracking-widest">Generate Dasar</Button>
-             </div>
-          </section>
+          {/* Adaptive Actions — Only show if there is some progress */}
+          {history.length > 0 && (
+            <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="p-8 rounded-[32px] bg-white border border-black/5 shadow-soft flex flex-col gap-6 group hover:border-primary/20 transition-all">
+                  <div className="size-14 rounded-2xl bg-primary/5 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Target className="size-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black">Level Up: HOTS</h3>
+                    <p className="text-sm text-muted-foreground mt-1 font-medium">Generate soal tantangan berpikir kritis dari materi terakhir.</p>
+                  </div>
+                  <Button onClick={() => onGenerateAdaptive("HOTS")} className="w-full h-12 rounded-xl bg-primary font-black uppercase tracking-widest">Generate HOTS</Button>
+              </div>
+              <div className="p-8 rounded-[32px] bg-sage/5 border border-sage/10 shadow-soft flex flex-col gap-6 group hover:border-sage/30 transition-all">
+                  <div className="size-14 rounded-2xl bg-sage/10 text-sage flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Zap className="size-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-sage">Fundamental</h3>
+                    <p className="text-sm text-muted-foreground mt-1 font-medium">Perkuat konsep dasar jika kamu merasa masih kesulitan.</p>
+                  </div>
+                  <Button onClick={() => onGenerateAdaptive("DASAR")} variant="outline" className="w-full h-12 rounded-xl border-sage/20 text-sage font-black uppercase tracking-widest">Generate Dasar</Button>
+              </div>
+            </section>
+          )}
 
           {/* Topics List */}
           <section className="space-y-12">
@@ -238,7 +245,7 @@ function CategoryDetailPage() {
             ) : (
                <div className="grid gap-6">
                   {Object.entries(groupedMaterials).map(([mId, data]) => (
-                    <Card key={mId} className="border-0 shadow-soft bg-white/40 rounded-[32px] overflow-hidden group hover:bg-white/60 transition-all">
+                    <Card key={mId} className="border-0 shadow-soft bg-background rounded-[32px] overflow-hidden group hover:bg-white transition-all">
                        <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
                           <div className="flex items-center gap-6 flex-1">
                              <div className={`size-16 rounded-2xl flex items-center justify-center shadow-sm ${data.bestScore ? 'bg-sage/10 text-sage' : 'bg-primary/5 text-primary/30'}`}>
