@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import {
-  Plus, BookOpen, FileText, Copy, Loader2, Sparkles, ArrowRight, Trophy, Eye
+  Plus, BookOpen, FileText, Copy, Loader2, Sparkles, ArrowRight, Trophy, Eye, UsersRound
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -229,21 +229,25 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
               joinedClasses.map(cls => (
                 <Link
                   key={cls.id}
-                  to="/class/$classId"
+                  to="/class/student/$classId"
                   params={{ classId: String(cls.id) }}
-                  className="block"
+                  className="block group"
                 >
-                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
+                  <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-2xl overflow-hidden">
+                    <CardContent className="p-5">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h3 className="font-bold">{cls.name}</h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            Kode: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-xs">{cls.classCode}</code>
+                          <h3 className="font-bold text-base leading-tight">{cls.name}</h3>
+                          <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1.5 font-bold uppercase tracking-widest">
+                            Kode: <code className="bg-secondary px-1.5 py-0.5 rounded font-mono text-primary">{cls.classCode}</code>
                           </p>
-                          <p className="text-xs text-muted-foreground mt-1">{cls.memberCount} murid bergabung</p>
+                          <p className="text-[11px] text-muted-foreground mt-2 font-medium flex items-center gap-1.5">
+                            <UsersRound className="size-3.5" /> {cls.memberCount} murid bergabung
+                          </p>
                         </div>
-                        <Eye className="size-4 text-muted-foreground shrink-0" />
+                        <div className="inline-flex items-center justify-center px-4 h-8 rounded-lg bg-primary text-white font-black text-[9px] uppercase tracking-widest shadow-soft group-hover:scale-105 transition">
+                          Lihat Detail
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -264,13 +268,13 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
             className="space-y-4"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold flex items-center gap-1.5">
+              <h3 className="text-sm font-bold flex items-center gap-1.5 uppercase tracking-widest text-muted-foreground">
                 <Sparkles className="size-4 text-primary" />
                 Kategori Saya
               </h3>
               <Dialog open={createCatOpen} onOpenChange={setCreateCatOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" variant="outline" className="text-sm text-xs">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-white text-[10px] font-black uppercase tracking-widest h-8 px-4 rounded-lg shadow-soft">
                     <Plus className="size-3.5 mr-1" /> Tambah Kategori
                   </Button>
                 </DialogTrigger>
@@ -308,18 +312,16 @@ export function StudentDashboard({ studentId, studentName }: { studentId: number
                     key={cat.id}
                     to="/category/$categoryId"
                     params={{ categoryId: String(cat.id) }}
-                    className="block"
+                    className="block group"
                   >
-                    <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <Card className="border-0 shadow-soft bg-white/60 hover:bg-white/80 transition-all cursor-pointer rounded-2xl overflow-hidden">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
                             <h3 className="font-bold text-sm">{cat.name}</h3>
-                            <p className="text-xs text-muted-foreground mt-0.5">Klik untuk melihat detail</p>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-[10px]">Self-Study</Badge>
-                            <Eye className="size-3.5 text-muted-foreground" />
+                          <div className="inline-flex items-center justify-center px-4 h-8 rounded-lg border border-primary/20 text-primary font-black text-[9px] uppercase tracking-widest group-hover:bg-primary group-hover:text-white transition-all">
+                            Lihat Detail
                           </div>
                         </div>
                       </CardContent>

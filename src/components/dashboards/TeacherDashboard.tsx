@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, BookOpen, Copy, Loader2, Trash2, UsersRound, Award, ArrowRight
@@ -171,14 +172,13 @@ export function TeacherDashboard({ teacherId }: { teacherId: number }) {
               </div>
 
               <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => loadMembers(cls.id)}
-                  className="text-primary border-primary/30 hover:bg-primary/5 text-xs"
+                <Link
+                  to="/class/teacher/$classId"
+                  params={{ classId: cls.id.toString() }}
+                  className="inline-flex items-center justify-center px-4 h-9 rounded-xl border border-primary/30 text-primary font-bold text-[10px] uppercase tracking-widest hover:bg-primary/5 active:scale-95 transition"
                 >
                   Lihat Detail <ArrowRight className="size-3 ml-1" />
-                </Button>
+                </Link>
                 <Button size="sm" variant="ghost" onClick={() => handleDeleteClass(cls.id)}
                   className="text-red-500 hover:text-red-700 hover:bg-red-50">
                   <Trash2 className="size-3.5" />
