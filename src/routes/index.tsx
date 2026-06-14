@@ -57,14 +57,14 @@ function Dashboard() {
             <span className="hidden sm:inline">Riwayat</span>
           </Link>
 
-          {user.role === "MURID" && (
+          {normalizedRole(user.role) === "MURID" && (
             <Link to="/explore" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft text-primary">
               <Layers className="size-3.5" />
               <span className="hidden sm:inline">Jelajahi</span>
             </Link>
           )}
 
-          {user.role === "SUPERADMIN" && (
+          {normalizedRole(user.role) === "SUPERADMIN" && (
             <Link to="/admin" className="inline-flex items-center gap-2 px-3 h-9 rounded-full glass text-xs font-bold hover:bg-white/70 transition shadow-soft text-primary">
               <ShieldCheck className="size-3.5" />
               <span className="hidden sm:inline">Admin Panel</span>
@@ -83,13 +83,13 @@ function Dashboard() {
 
       {/* Role-Based Dashboard Content */}
       <section className="max-w-6xl mx-auto pt-12 pb-10">
-        {user.role === "SUPERADMIN" && (
+        {normalizedRole(user.role) === "SUPERADMIN" && (
           <RoleBanner user={user} />
         )}
-        {user.role === "MURID" && (
+        {normalizedRole(user.role) === "MURID" && (
           <RoleBanner user={user} />
         )}
-        {user.role === "GURU" && (
+        {normalizedRole(user.role) === "GURU" && (
           <RoleBanner user={user} />
         )}
       </section>
@@ -131,10 +131,16 @@ function RoleBanner({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
   );
 }
 
+function normalizedRole(role: string): string {
+  // "USER" from login stub should be treated as "MURID"
+  return role === "USER" ? "MURID" : role;
+}
+
 function RoleBasedDashboard({ user }: { user: ReturnType<typeof useAuth>["user"] }) {
   if (!user) return null;
+  const role = normalizedRole(user.role);
 
-  if (user.role === "SUPERADMIN") {
+  if (role === "SUPERADMIN") {
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <h1 className="text-2xl font-black mb-6 flex items-center gap-2">
@@ -146,7 +152,7 @@ function RoleBasedDashboard({ user }: { user: ReturnType<typeof useAuth>["user"]
     );
   }
 
-  if (user.role === "GURU") {
+  if (role === "GURU") {
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <h1 className="text-2xl font-black mb-6 flex items-center gap-2">
@@ -158,7 +164,7 @@ function RoleBasedDashboard({ user }: { user: ReturnType<typeof useAuth>["user"]
     );
   }
 
-  if (user.role === "MURID") {
+  if (role === "MURID") {
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <h1 className="text-2xl font-black mb-6 flex items-center gap-2">
