@@ -64,8 +64,9 @@ function TeacherClassDetailPage() {
     if (!ready || !user || isNaN(classIdNum)) return;
     setLoading(true);
     try {
-      const [membersData, flashcardsData, quizzesData, allClasses] = await Promise.all([
+      const [membersData, materialsData, flashcardsData, quizzesData, allClasses] = await Promise.all([
         api.getClassMembers(classIdNum),
+        api.getMaterials(classIdNum),
         api.getFlashcards(classIdNum),
         api.getQuizzes(classIdNum),
         api.getTeacherClasses(Number(user.userId))
@@ -75,17 +76,22 @@ function TeacherClassDetailPage() {
       
       const groups: Record<number, { id: number; title: string; quizzes: any[]; flashcards: any[] }> = {};
       
+      // Initialize groups with all materials
+      (Array.isArray(materialsData) ? materialsData : []).forEach((m: any) => {
+        groups[m.id] = { id: m.id, title: m.title, quizzes: [], flashcards: [] };
+      });
+
+      // Populate quizzes
       (Array.isArray(quizzesData) ? quizzesData : []).forEach((q: any) => {
         const mId = q.material?.id;
-        if (!mId) return;
-        if (!groups[mId]) groups[mId] = { id: mId, title: q.material.title, quizzes: [], flashcards: [] };
+        if (!mId || !groups[mId]) return;
         groups[mId].quizzes.push(q);
       });
 
+      // Populate flashcards
       (Array.isArray(flashcardsData) ? flashcardsData : []).forEach((f: any) => {
         const mId = f.material?.id;
-        if (!mId) return;
-        if (!groups[mId]) groups[mId] = { id: mId, title: f.material.title, quizzes: [], flashcards: [] };
+        if (!mId || !groups[mId]) return;
         groups[mId].flashcards.push(f);
       });
 
