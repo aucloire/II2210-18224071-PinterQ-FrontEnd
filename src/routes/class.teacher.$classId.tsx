@@ -17,6 +17,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription
 } from "@/components/ui/dialog";
 import { FlashcardCarousel } from "@/components/study";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/class/teacher/$classId")({
   component: TeacherClassDetailPage,
@@ -103,20 +104,25 @@ function TeacherClassDetailPage() {
   }, [classIdNum, ready, user]);
 
   const handleAddTopic = async (generateAI: boolean = false) => {
-    if (!newTopicTitle.trim() || !newTopicContent.trim()) return;
+    if (!newTopicTitle.trim() || !newTopicContent.trim()) {
+      toast.error("Judul dan isi materi wajib diisi");
+      return;
+    }
     setIsCreatingTopic(true);
     try {
       if (generateAI) {
         await api.generateStudyMaterial(Number(user?.userId), classIdNum, newTopicTitle, newTopicContent);
+        toast.success("Materi, Kuis, dan Flashcards berhasil dibuat!");
       } else {
         await api.createMaterial(Number(user?.userId), classIdNum, newTopicTitle, newTopicContent);
+        toast.success("Topik berhasil dibuat");
       }
       setNewTopicTopicTitle("");
       setNewTopicContent("");
       setIsAddTopicOpen(false);
       fetchData();
-    } catch (err) {
-      alert("Gagal menambahkan topik");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menambahkan topik");
     } finally {
       setIsCreatingTopic(false);
     }
@@ -126,9 +132,10 @@ function TeacherClassDetailPage() {
     if (!confirm("Hapus topik ini beserta semua kuis dan flashcard di dalamnya?")) return;
     try {
       await api.deleteMaterial(materialId);
+      toast.success("Topik dihapus");
       fetchData();
     } catch (err) {
-      alert("Gagal menghapus topik");
+      toast.error("Gagal menghapus topik");
     }
   };
 
@@ -156,11 +163,12 @@ function TeacherClassDetailPage() {
     if (!activeMaterialId) return;
     try {
       await api.createQuiz(activeMaterialId, quizForm);
+      toast.success("Soal kuis ditambahkan");
       setIsAddOpenQuiz(false);
       setQuizQuizForm({ question: "", optionA: "", optionB: "", optionC: "", optionD: "", correctAnswer: "A", explanation: "" });
       fetchData();
     } catch (err) {
-      alert("Gagal menambah kuis");
+      toast.error("Gagal menambah kuis");
     }
   };
 
@@ -168,11 +176,12 @@ function TeacherClassDetailPage() {
     if (!activeMaterialId) return;
     try {
       await api.createFlashcard(activeMaterialId, cardForm);
+      toast.success("Flashcard ditambahkan");
       setIsAddCardOpen(false);
       setCardForm({ question: "", answer: "" });
       fetchData();
     } catch (err) {
-      alert("Gagal menambah flashcard");
+      toast.error("Gagal menambah flashcard");
     }
   };
 

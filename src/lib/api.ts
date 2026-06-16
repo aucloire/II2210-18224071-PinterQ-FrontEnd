@@ -69,8 +69,11 @@ export const api = {
       headers: authHeaders(),
       body: JSON.stringify({ userId, categoryId, title, content }),
     });
-    if (!res.ok) throw new Error("Gagal generate materi");
-    return res.text();
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Gagal generate materi");
+    }
+    return res.json();
   },
 
   generateAdaptive: async (categoryId: number, difficulty: string) => {
@@ -79,7 +82,10 @@ export const api = {
       headers: authHeaders(),
       body: JSON.stringify({ categoryId, difficulty }),
     });
-    if (!res.ok) throw new Error("Gagal generate kuis adaptif");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || "Gagal generate kuis adaptif");
+    }
     return res.text();
   },
 
