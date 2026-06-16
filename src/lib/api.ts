@@ -63,11 +63,11 @@ export const api = {
   },
 
   // === AI GENERATION ===
-  generateStudyMaterial: async (userId: number, categoryId: number, title: string, content: string) => {
+  generateStudyMaterial: async (userId: number, categoryId: number, title: string, content: string, id?: number) => {
     const res = await fetch(`${BASE_URL}/study/generate`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ userId, categoryId, title, content }),
+      body: JSON.stringify({ userId, categoryId, title, content, id }),
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));

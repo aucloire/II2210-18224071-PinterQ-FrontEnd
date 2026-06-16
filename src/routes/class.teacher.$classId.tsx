@@ -51,7 +51,7 @@ function TeacherClassDetailPage() {
 
   const [classData, setClassData] = useState<ClassItem | null>(null);
   const [members, setMembers] = useState<ClassMember[]>([]);
-  const [groupedMaterials, setGroupedMaterials] = useState<Record<number, { id: number; title: string; quizzes: any[]; flashcards: any[] }>>({});
+  const [groupedMaterials, setGroupedMaterials] = useState<Record<number, { id: number; title: string; content: string; quizzes: any[]; flashcards: any[] }>>({});
   const [loading, setLoading] = useState(true);
 
   // Modal States
@@ -74,11 +74,11 @@ function TeacherClassDetailPage() {
 
       setMembers(Array.isArray(membersData) ? membersData : []);
       
-      const groups: Record<number, { id: number; title: string; quizzes: any[]; flashcards: any[] }> = {};
+      const groups: Record<number, { id: number; title: string; content: string; quizzes: any[]; flashcards: any[] }> = {};
       
       // Initialize groups with all materials
       (Array.isArray(materialsData) ? materialsData : []).forEach((m: any) => {
-        groups[m.id] = { id: m.id, title: m.title, quizzes: [], flashcards: [] };
+        groups[m.id] = { id: m.id, title: m.title, content: m.content || "", quizzes: [], flashcards: [] };
       });
 
       // Populate quizzes
@@ -131,6 +131,21 @@ function TeacherClassDetailPage() {
       toast.error(err.message || "Gagal menambahkan topik");
     } finally {
       setIsCreatingTopic(false);
+    }
+  };
+
+  const [isGeneratingMore, setIsGeneratingMore] = useState<number | null>(null);
+
+  const handleGenerateMore = async (materialId: number, title: string, content: string) => {
+    setIsGeneratingMore(materialId);
+    try {
+      await api.generateStudyMaterial(Number(user?.userId), classIdNum, title, content, materialId);
+      toast.success("Berhasil menambahkan lebih banyak kuis & kartu!");
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menambahkan soal tambahan");
+    } finally {
+      setIsGeneratingMore(null);
     }
   };
 
@@ -410,8 +425,13 @@ function TeacherClassDetailPage() {
                                     </DialogContent>
                                  </Dialog>
                                  
-                                 <button onClick={() => { setNewTopicTopicTitle(data.title); handleAddTopic(true); }} className="h-12 rounded-2xl bg-sage text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-soft flex items-center justify-center gap-2 hover:brightness-105 transition-all">
-                                    <Sparkles className="size-4" /> Generate Lagi
+                                 <button 
+                                   onClick={() => handleGenerateMore(data.id, data.title, data.content)} 
+                                   disabled={isGeneratingMore === data.id}
+                                   className="h-12 rounded-2xl bg-sage text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-soft flex items-center justify-center gap-2 hover:brightness-105 transition-all disabled:opacity-50"
+                                 >
+                                    {isGeneratingMore === data.id ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+                                    Generate Lagi
                                  </button>
                               </div>
                            </div>
