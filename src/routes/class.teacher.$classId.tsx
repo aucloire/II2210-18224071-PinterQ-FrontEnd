@@ -83,14 +83,14 @@ function TeacherClassDetailPage() {
 
       // Populate quizzes
       (Array.isArray(quizzesData) ? quizzesData : []).forEach((q: any) => {
-        const mId = q.material?.id;
+        const mId = q.materialId;
         if (!mId || !groups[mId]) return;
         groups[mId].quizzes.push(q);
       });
 
       // Populate flashcards
       (Array.isArray(flashcardsData) ? flashcardsData : []).forEach((f: any) => {
-        const mId = f.material?.id;
+        const mId = f.materialId;
         if (!mId || !groups[mId]) return;
         groups[mId].flashcards.push(f);
       });
