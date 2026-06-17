@@ -13,28 +13,36 @@ function authHeaders() {
 
 export const api = {
   // === AUTH ===
-  login: async (data: any) => {
+  login: async (username: string, password: string) => {
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ username, password }),
     });
-    if (!res.ok) throw new Error("Login gagal");
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Login gagal");
+    }
     return res.json();
   },
 
-  register: async (data: any) => {
+  register: async (username: string, email: string, password: string, role: string, fullName?: string) => {
     const res = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ username, email, password, role, fullName }),
     });
-    if (!res.ok) throw new Error("Registrasi gagal");
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Registrasi gagal");
+    }
     return res.json();
   },
 
-  getProfile: async () => {
-    const res = await fetch(`${BASE_URL}/auth/profile`, {
+  getProfile: async (userId?: number) => {
+    // If userId is provided, use it, otherwise use the /profile endpoint
+    const url = userId ? `${BASE_URL}/auth/profile/${userId}` : `${BASE_URL}/auth/profile`;
+    const res = await fetch(url, {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal mengambil profil");
