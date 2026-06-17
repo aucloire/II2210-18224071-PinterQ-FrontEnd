@@ -41,7 +41,7 @@ export const api = {
 
   getProfile: async (userId?: number) => {
     // If userId is provided, use it, otherwise use the /profile endpoint
-    const url = userId ? `${BASE_URL}/auth/profile/${userId}` : `${BASE_URL}/auth/profile`;
+    const url = userId ? `${BASE_URL}/users/profile/${userId}` : `${BASE_URL}/auth/profile`;
     const res = await fetch(url, {
       headers: authHeaders(),
     });
@@ -50,7 +50,7 @@ export const api = {
   },
 
   updateProfile: async (userId: number, updates: any) => {
-    const res = await fetch(`${BASE_URL}/auth/profile/${userId}`, {
+    const res = await fetch(`${BASE_URL}/users/profile/${userId}`, {
       method: "PUT",
       headers: authHeaders(),
       body: JSON.stringify(updates),

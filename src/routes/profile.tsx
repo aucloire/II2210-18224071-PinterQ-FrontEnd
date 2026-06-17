@@ -280,8 +280,8 @@ function ProfilePage() {
                 <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   Username
                 </label>
-                <div className="relative mt-1.5">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">@</span>
+                <div className="relative mt-1.5 group/input">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-sm select-none transition-colors group-focus-within/input:text-primary">@</div>
                   <input
                     type="text"
                     value={username}
@@ -291,7 +291,7 @@ function ProfilePage() {
                     }}
                     onBlur={handleUsernameBlur}
                     placeholder="username"
-                    className={`w-full rounded-2xl border-0 pl-8 pr-4 h-12 focus:outline-none focus:ring-2 text-sm font-medium ${duplicateError ? "ring-2 ring-destructive/50" : ""}`}
+                    className={`w-full rounded-2xl border-0 pl-9 pr-4 h-12 focus:outline-none focus:ring-2 text-sm font-bold transition-all ${duplicateError ? "ring-2 ring-destructive/50" : "focus:ring-primary/20"}`}
                     style={{ backgroundColor: "var(--color-secondary)" }}
                   />
                 </div>
@@ -309,7 +309,7 @@ function ProfilePage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="cth. Raka Pratama"
-                  className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2 text-sm font-medium"
+                  className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2 text-sm font-bold transition-all focus:ring-primary/20"
                   style={{ backgroundColor: "var(--color-secondary)" }}
                 />
               </div>
