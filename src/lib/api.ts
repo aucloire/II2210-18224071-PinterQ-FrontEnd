@@ -43,14 +43,14 @@ export const api = {
 
   // === CLASSES ===
   getTeacherClasses: async (teacherId: number) => {
-    const res = await fetch(`${BASE_URL}/classes/teacher/${teacherId}`, {
+    const res = await fetch(`${BASE_URL}/classes/my/${teacherId}`, {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal mengambil daftar kelas");
     return res.json();
   },
 
-  getStudentClasses: async (studentId: number) => {
+  getStudentJoinedClasses: async (studentId: number) => {
     const res = await fetch(`${BASE_URL}/classes/student/${studentId}`, {
       headers: authHeaders(),
     });
@@ -68,13 +68,16 @@ export const api = {
     return res.json();
   },
 
-  joinClass: async (data: any) => {
+  joinClass: async (studentId: number, classCode: string) => {
     const res = await fetch(`${BASE_URL}/classes/join`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify(data),
+      body: JSON.stringify({ studentId, classCode }),
     });
-    if (!res.ok) throw new Error("Gagal bergabung ke kelas");
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Gagal bergabung ke kelas");
+    }
     return res.json();
   },
 
@@ -88,20 +91,20 @@ export const api = {
 
   // === CATEGORIES (SUBJECTS) ===
   getCategories: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/study/categories/${userId}`, {
+    const res = await fetch(`${BASE_URL}/categories/user/${userId}`, {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal mengambil kategori");
     return res.json();
   },
 
-  createCategory: async (data: any) => {
-    const res = await fetch(`${BASE_URL}/study/categories`, {
+  createCategory: async (userId: number, name: string) => {
+    const res = await fetch(`${BASE_URL}/categories`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify(data),
+      body: JSON.stringify({ userId, name }),
     });
-    if (!res.ok) throw new Error("Gagal membuat mata kuliah baru");
+    if (!res.ok) throw new Error("Gagal membuat kategori baru");
     return res.json();
   },
 
