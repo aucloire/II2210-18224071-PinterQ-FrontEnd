@@ -274,7 +274,7 @@ export const api = {
   },
 
   deleteUser: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/admin/users/${userId}`, {
+    const res = await fetch(`${BASE_URL}/admin/${userId}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
