@@ -49,19 +49,29 @@ function ProfilePage() {
 
   useEffect(() => {
     if (!ready || !user) return;
+    
+    // Fallback awal: Pakai data dari login/localStorage agar tidak kosong
+    const rawStored = user.username || "";
+    setUsername(rawStored.startsWith("@") ? rawStored.slice(1) : rawStored);
+    setFullName(user.fullName || "");
+    setProfileImageUrl(user.profileImageUrl || "");
+
     const userId = Number(user.userId);
     if (!userId) return;
 
     setLoading(true);
     api.getProfile(userId)
       .then((data) => {
-        setFullName(data.fullName || "");
-        setProfileImageUrl(data.profileImageUrl || "");
-        // Store username without @ for internal state
-        const rawUsername = data.username || "";
-        setUsername(rawUsername.startsWith("@") ? rawUsername.slice(1) : rawUsername);
+        if (data) {
+          setFullName(data.fullName || "");
+          setProfileImageUrl(data.profileImageUrl || "");
+          const rawApi = data.username || "";
+          setUsername(rawApi.startsWith("@") ? rawApi.slice(1) : rawApi);
+        }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error("Gagal sinkron profil dengan server:", err);
+      })
       .finally(() => setLoading(false));
   }, [user, ready]);
 
@@ -101,18 +111,9 @@ function ProfilePage() {
     setImageUrl("");
   };
 
-  const handleUsernameBlur = async () => {
+  const handleUsernameBlur = () => {
     if (!username.trim()) return;
     setDuplicateError("");
-    // We don't have this API yet, skipping for now to prevent errors
-    /*
-    try {
-      const res = await api.checkUsernameAvailability(username);
-      if (!res.available) {
-        setDuplicateError("Username sudah dipakai.");
-      }
-    } catch {}
-    */
   };
 
   const handleSave = async () => {
@@ -122,9 +123,11 @@ function ProfilePage() {
     setSaving(true);
     setErrorMsg("");
     try {
-      const res = await api.updateProfile(Number(user.userId), {
-        fullName: fullName || undefined,
-        username: username || undefined,
+      const cleanUsername = username.trim().startsWith("@") ? username.trim().slice(1) : username.trim();
+
+      await api.updateProfile(Number(user.userId), {
+        fullName: fullName.trim() || undefined,
+        username: cleanUsername || undefined,
         profileImageUrl: profileImageUrl || undefined,
       });
       
@@ -132,8 +135,8 @@ function ProfilePage() {
       if (stored) {
         setStoredUser({
           ...stored,
-          fullName: fullName || username,
-          username: username,
+          fullName: fullName.trim() || cleanUsername,
+          username: cleanUsername,
           profileImageUrl: profileImageUrl || "",
         });
       }
@@ -170,7 +173,7 @@ function ProfilePage() {
           <h1 className="text-2xl font-bold tracking-tight">Profil Saya</h1>
         </div>
 
-        {loading ? (
+        {loading && !username ? (
           <div className="flex justify-center py-12">
             <Loader2 className="size-6 animate-spin text-primary/30" />
           </div>
@@ -268,20 +271,23 @@ function ProfilePage() {
                 e.preventDefault();
                 handleSave();
               }}
-              className="space-y-3"
+              className="space-y-4"
             >
               {errorMsg && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl border border-red-100">
+                <div className="bg-red-50 text-red-600 text-xs font-bold p-4 rounded-2xl border border-red-100">
                   {errorMsg}
                 </div>
               )}
 
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">
                   Username
                 </label>
-                <div className="relative mt-1.5 group/input">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black text-sm select-none transition-colors group-focus-within/input:text-primary">@</div>
+                <div 
+                  className={`flex items-center rounded-2xl h-14 px-4 transition-all border-2 border-transparent focus-within:border-primary/20 focus-within:bg-white shadow-sm ${duplicateError ? "border-destructive/50" : ""}`}
+                  style={{ backgroundColor: "var(--color-secondary)" }}
+                >
+                  <span className="text-muted-foreground font-black text-sm select-none mr-1">@</span>
                   <input
                     type="text"
                     value={username}
@@ -291,17 +297,16 @@ function ProfilePage() {
                     }}
                     onBlur={handleUsernameBlur}
                     placeholder="username"
-                    className={`w-full rounded-2xl border-0 pl-9 pr-4 h-12 focus:outline-none focus:ring-2 text-sm font-bold transition-all ${duplicateError ? "ring-2 ring-destructive/50" : "focus:ring-primary/20"}`}
-                    style={{ backgroundColor: "var(--color-secondary)" }}
+                    className="w-full bg-transparent border-0 p-0 focus:outline-none focus:ring-0 text-sm font-black tracking-wide"
                   />
                 </div>
                 {duplicateError && (
-                  <p className="text-xs text-destructive mt-1 font-medium">{duplicateError}</p>
+                  <p className="text-xs text-destructive mt-1 font-bold ml-1">{duplicateError}</p>
                 )}
               </div>
 
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">
                   Nama Lengkap
                 </label>
                 <input
@@ -309,23 +314,23 @@ function ProfilePage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="cth. Raka Pratama"
-                  className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2 text-sm font-bold transition-all focus:ring-primary/20"
+                  className="w-full rounded-2xl border-2 border-transparent px-5 h-14 focus:outline-none focus:border-primary/20 focus:bg-white text-sm font-black tracking-wide transition-all shadow-sm"
                   style={{ backgroundColor: "var(--color-secondary)" }}
                 />
               </div>
 
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 disabled={saving || !!duplicateError}
-                className="w-full h-12 mt-4 rounded-2xl font-semibold text-white shadow-glow flex justify-center items-center gap-2 disabled:opacity-50"
+                className="w-full h-14 mt-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] text-white shadow-glow flex justify-center items-center gap-2 disabled:opacity-50 transition-all"
                 style={{ backgroundColor: "var(--color-blush)" }}
               >
                 {saving ? (
                   <Loader2 className="size-5 animate-spin" />
                 ) : saved ? (
-                  "Tersimpan!"
+                  "✨ Tersimpan!"
                 ) : (
                   <>
                     <Save className="size-4" />
