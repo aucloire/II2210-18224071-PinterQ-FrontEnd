@@ -53,7 +53,8 @@ function StudentClassDetailPage() {
     
     const fetchData = async () => {
       try {
-        const [flashcardsData, quizzesData, joinedClasses, membersData, historyData] = await Promise.all([
+        const [materialsData, flashcardsData, quizzesData, joinedClasses, membersData, historyData] = await Promise.all([
+          api.getMaterials(classIdNum),
           api.getFlashcards(classIdNum),
           api.getQuizzes(classIdNum),
           api.getStudentJoinedClasses(Number(user.userId)),
@@ -65,17 +66,22 @@ function StudentClassDetailPage() {
 
         const groups: Record<number, { id: number; title: string; quizzes: any[]; flashcards: any[]; bestScore?: number }> = {};
         
+        // Initialize groups with all materials
+        (Array.isArray(materialsData) ? materialsData : []).forEach((m: any) => {
+          groups[m.id] = { id: m.id, title: m.title, quizzes: [], flashcards: [] };
+        });
+
+        // Populate quizzes
         (Array.isArray(quizzesData) ? quizzesData : []).forEach((q: any) => {
-          const mId = q.material?.id;
-          if (!mId) return;
-          if (!groups[mId]) groups[mId] = { id: mId, title: q.material.title, quizzes: [], flashcards: [] };
+          const mId = q.materialId;
+          if (!mId || !groups[mId]) return;
           groups[mId].quizzes.push(q);
         });
 
+        // Populate flashcards
         (Array.isArray(flashcardsData) ? flashcardsData : []).forEach((f: any) => {
-          const mId = f.material?.id;
-          if (!mId) return;
-          if (!groups[mId]) groups[mId] = { id: mId, title: f.material.title, quizzes: [], flashcards: [] };
+          const mId = f.materialId;
+          if (!mId || !groups[mId]) return;
           groups[mId].flashcards.push(f);
         });
 

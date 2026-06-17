@@ -3,60 +3,103 @@ import { getToken } from "./auth";
 // Gunakan environment variable atau fallback ke production URL
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL || "https://api-aucloire.stei.my.id/api").replace(/\/$/, "");
 
-function authHeaders(): HeadersInit {
+function authHeaders() {
   const token = getToken();
-  const headers: HeadersInit = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  return headers;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 }
 
 export const api = {
   // === AUTH ===
-  login: async (username: string, password: string) => {
+  login: async (data: any) => {
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify(data),
     });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Gagal login");
-    }
+    if (!res.ok) throw new Error("Login gagal");
     return res.json();
   },
 
-  // === CATEGORIES ===
-  getPublicCategories: async () => {
-    const res = await fetch(`${BASE_URL}/categories/public`);
-    if (!res.ok) throw new Error("Gagal mengambil kategori publik");
-    return res.json();
-  },
-
-  register: async (username: string, email: string, password: string, role: string = "MURID") => {
+  register: async (data: any) => {
     const res = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password, role }),
+      body: JSON.stringify(data),
     });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Gagal register");
-    }
+    if (!res.ok) throw new Error("Registrasi gagal");
     return res.json();
   },
 
-  // === FOLDERS / SUBJECTS ===
-  getCategories: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/categories/user/${userId}`);
-    if (!res.ok) throw new Error("Gagal mengambil mata kuliah");
+  getProfile: async () => {
+    const res = await fetch(`${BASE_URL}/auth/profile`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil profil");
     return res.json();
   },
 
-  createCategory: async (userId: number, name: string) => {
-    const res = await fetch(`${BASE_URL}/categories`, {
+  // === CLASSES ===
+  getTeacherClasses: async (teacherId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/teacher/${teacherId}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil daftar kelas");
+    return res.json();
+  },
+
+  getStudentClasses: async (studentId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/student/${studentId}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil daftar kelas");
+    return res.json();
+  },
+
+  createClass: async (data: any) => {
+    const res = await fetch(`${BASE_URL}/classes`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ userId, name }),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Gagal membuat kelas");
+    return res.json();
+  },
+
+  joinClass: async (data: any) => {
+    const res = await fetch(`${BASE_URL}/classes/join`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Gagal bergabung ke kelas");
+    return res.json();
+  },
+
+  getClassMembers: async (classId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/${classId}/members`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil daftar murid");
+    return res.json();
+  },
+
+  // === CATEGORIES (SUBJECTS) ===
+  getCategories: async (userId: number) => {
+    const res = await fetch(`${BASE_URL}/study/categories/${userId}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil kategori");
+    return res.json();
+  },
+
+  createCategory: async (data: any) => {
+    const res = await fetch(`${BASE_URL}/study/categories`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Gagal membuat mata kuliah baru");
     return res.json();
@@ -96,27 +139,17 @@ export const api = {
       headers: authHeaders(),
       body: JSON.stringify({ userId, categoryId, title, content }),
     });
-    if (!res.ok) throw new Error("Gagal membuat materi");
+    if (!res.ok) throw new Error("Gagal membuat topik");
     return res.json();
   },
 
-  updateMaterial: async (materialId: number, data: { title?: string; content?: string }) => {
-    const res = await fetch(`${BASE_URL}/study/materials/${materialId}`, {
-      method: "PUT",
-      headers: authHeaders(),
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) throw new Error("Gagal memperbarui materi");
-    return res.json();
-  },
-
-  deleteMaterial: async (materialId: number) => {
-    const res = await fetch(`${BASE_URL}/study/materials/${materialId}`, {
+  deleteMaterial: async (id: number) => {
+    const res = await fetch(`${BASE_URL}/study/materials/${id}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal menghapus materi");
-    return res.json();
+    return res.text();
   },
 
   // === QUIZZES CRUD ===
@@ -136,7 +169,7 @@ export const api = {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal menghapus kuis");
-    return res.json();
+    return res.text();
   },
 
   // === FLASHCARDS CRUD ===
@@ -156,7 +189,7 @@ export const api = {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal menghapus flashcard");
-    return res.json();
+    return res.text();
   },
 
   getFlashcards: async (categoryId: number) => {
@@ -229,118 +262,25 @@ export const api = {
     return res.json();
   },
 
-  setRole: async (userId: number, role: string) => {
-    const res = await fetch(`${BASE_URL}/admin/set-role/${userId}`, {
-      method: "PUT",
-      headers: authHeaders(),
-      body: JSON.stringify({ role }),
-    });
-    if (!res.ok) throw new Error("Gagal mengubah role");
-    return res.json();
-  },
-
   deleteUser: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/admin/${userId}`, {
+    const res = await fetch(`${BASE_URL}/admin/users/${userId}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error("Gagal menghapus pengguna");
-    return res.json();
-  },
-
-  // === PROFILE ===
-  getProfile: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/users/${userId}`, {
-      headers: authHeaders(),
-    });
-    if (!res.ok) throw new Error("Gagal mengambil profil");
-    return res.json();
-  },
-
-  updateProfile: async (userId: number, data: { fullName?: string; username?: string; profileImageUrl?: string }) => {
-    const res = await fetch(`${BASE_URL}/users/${userId}`, {
-      method: "PUT",
-      headers: authHeaders(),
-      body: JSON.stringify(data),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || "Gagal memperbarui profil");
-    }
-    return res.json();
-  },
-
-  checkUsernameAvailability: async (username: string) => {
-    const res = await fetch(`${BASE_URL}/users/check-username?username=${encodeURIComponent(username)}`);
-    if (!res.ok) throw new Error("Gagal cek username");
-    return res.json();
-  },
-
-  // === CLASSES ===
-  createClass: async (name: string, teacherId: number) => {
-    const res = await fetch(`${BASE_URL}/classes`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ name, teacherId }),
-    });
-    if (!res.ok) throw new Error("Gagal membuat kelas");
-    return res.json();
-  },
-
-  joinClass: async (studentId: number, classCode: string) => {
-    const res = await fetch(`${BASE_URL}/classes/join`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ studentId, classCode }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || "Gagal bergabung ke kelas");
-    }
-    return res.json();
-  },
-
-  getTeacherClasses: async (teacherId: number) => {
-    const res = await fetch(`${BASE_URL}/classes/my/${teacherId}`);
-    if (!res.ok) throw new Error("Gagal mengambil daftar kelas");
-    return res.json();
-  },
-
-  getClassMembers: async (classId: number) => {
-    const res = await fetch(`${BASE_URL}/classes/${classId}/members`);
-    if (!res.ok) throw new Error("Gagal mengambil anggota kelas");
-    return res.json();
-  },
-
-  getTeacherStudents: async (teacherId: number) => {
-    const res = await fetch(`${BASE_URL}/classes/students/${teacherId}`);
-    if (!res.ok) throw new Error("Gagal mengambil daftar murid");
-    return res.json();
-  },
-
-  getStudentJoinedClasses: async (studentId: number) => {
-    const res = await fetch(`${BASE_URL}/classes/student/${studentId}`);
-    if (!res.ok) throw new Error("Gagal mengambil kelas yang diikuti");
-    return res.json();
-  },
-
-  deleteClass: async (classId: number) => {
-    const res = await fetch(`${BASE_URL}/classes/${classId}`, {
-      method: "DELETE",
-      headers: authHeaders(),
-    });
-    if (!res.ok) throw new Error("Gagal menghapus kelas");
-    return res.json();
+    if (!res.ok) throw new Error("Gagal menghapus user");
+    return res.text();
   },
 
   // === NOTIFICATIONS ===
   getNotifications: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/notifications?userId=${userId}`);
+    const res = await fetch(`${BASE_URL}/notifications/${userId}`, {
+      headers: authHeaders(),
+    });
     if (!res.ok) throw new Error("Gagal mengambil notifikasi");
     return res.json();
   },
 
-  markNotificationRead: async (notificationId: number) => {
+  markNotificationAsRead: async (notificationId: number) => {
     const res = await fetch(`${BASE_URL}/notifications/${notificationId}/read`, {
       method: "PUT",
       headers: authHeaders(),
