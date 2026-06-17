@@ -41,27 +41,24 @@ function StudyQuizPage() {
 
     const loadQuizzes = async () => {
       try {
-        // If we have categoryId, we fetch all quizzes for that category and filter by materialId
         if (categoryId) {
           const raw = await api.getQuizzes(categoryId);
-          const filtered = (Array.isArray(raw) ? raw : []).filter((q: any) => q.material?.id === materialId);
+          const filtered = (Array.isArray(raw) ? raw : []).filter((q: any) => q.materialId === materialId);
           
-          if (filtered.length > 0) {
-            setMaterialTitle(filtered[0].material.title);
-          }
-
           const mapped: QuizQuestion[] = filtered.map((q: any) => ({
             id: q.id,
             question: q.question,
             options: [q.optionA, q.optionB, q.optionC, q.optionD],
             correctIndex: ["A", "B", "C", "D"].indexOf(q.correctAnswer),
             explanation: q.explanation,
-            materialId: q.material?.id,
+            materialId: q.materialId,
           }));
           setQuizzes(mapped);
-        } else {
-          // Fallback if no categoryId (less efficient, but handles direct links if we add an API later)
-          console.error("No categoryId provided for quiz study");
+
+          // Get material title from materials list
+          const materials = await api.getMaterials(categoryId);
+          const m = (Array.isArray(materials) ? materials : []).find((m: any) => m.id === materialId);
+          if (m) setMaterialTitle(m.title);
         }
       } catch (err) {
         console.error(err);

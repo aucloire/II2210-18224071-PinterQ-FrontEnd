@@ -276,7 +276,7 @@ export const api = {
 
   // === NOTIFICATIONS ===
   getNotifications: async (userId: number) => {
-    const res = await fetch(`${BASE_URL}/notifications/${userId}`, {
+    const res = await fetch(`${BASE_URL}/notifications?userId=${userId}`, {
       headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Gagal mengambil notifikasi");

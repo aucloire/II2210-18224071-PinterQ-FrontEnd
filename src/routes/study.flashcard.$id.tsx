@@ -45,12 +45,13 @@ function StudyFlashcardPage() {
       try {
         if (categoryId) {
           const raw = await api.getFlashcards(categoryId);
-          const filtered = (Array.isArray(raw) ? raw : []).filter((f: any) => f.material?.id === materialId);
-          
-          if (filtered.length > 0) {
-            setMaterialTitle(filtered[0].material.title);
-          }
+          const filtered = (Array.isArray(raw) ? raw : []).filter((f: any) => f.materialId === materialId);
           setCards(filtered);
+
+          // Get material title from materials list
+          const materials = await api.getMaterials(categoryId);
+          const m = (Array.isArray(materials) ? materials : []).find((m: any) => m.id === materialId);
+          if (m) setMaterialTitle(m.title);
         }
       } catch (err) {
         console.error(err);
