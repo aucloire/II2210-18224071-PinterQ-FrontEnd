@@ -57,7 +57,9 @@ function ProfilePage() {
       .then((data) => {
         setFullName(data.fullName || "");
         setProfileImageUrl(data.profileImageUrl || "");
-        setUsername(data.username);
+        // Store username without @ for internal state
+        const rawUsername = data.username || "";
+        setUsername(rawUsername.startsWith("@") ? rawUsername.slice(1) : rawUsername);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -101,38 +103,38 @@ function ProfilePage() {
 
   const handleUsernameBlur = async () => {
     if (!username.trim()) return;
-    const stripped = username.trim().startsWith("@") ? username.trim().slice(1) : username.trim();
     setDuplicateError("");
+    // We don't have this API yet, skipping for now to prevent errors
+    /*
     try {
-      const res = await api.checkUsernameAvailability(stripped);
+      const res = await api.checkUsernameAvailability(username);
       if (!res.available) {
         setDuplicateError("Username sudah dipakai.");
       }
-    } catch {
-      // ignore
-    }
+    } catch {}
+    */
   };
 
   const handleSave = async () => {
     if (!user) return;
     if (duplicateError) return;
 
-    const stripped = username.trim().startsWith("@") ? username.trim().slice(1) : username.trim();
     setSaving(true);
     setErrorMsg("");
     try {
-      const updated = await api.updateProfile(Number(user.userId), {
+      const res = await api.updateProfile(Number(user.userId), {
         fullName: fullName || undefined,
-        username: stripped || undefined,
+        username: username || undefined,
         profileImageUrl: profileImageUrl || undefined,
       });
+      
       const stored = getStoredUser();
       if (stored) {
         setStoredUser({
           ...stored,
-          fullName: updated.fullName || updated.username || stripped,
-          username: stripped,
-          profileImageUrl: updated.profileImageUrl || "",
+          fullName: fullName || username,
+          username: username,
+          profileImageUrl: profileImageUrl || "",
         });
       }
       setSaved(true);
@@ -145,8 +147,6 @@ function ProfilePage() {
   };
 
   if (!ready || !user) return null;
-
-  const displayUsername = username.startsWith("@") ? username : "@" + username;
 
   return (
     <main className="min-h-screen w-full flex items-center justify-center px-5 py-12">
@@ -280,18 +280,21 @@ function ProfilePage() {
                 <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   Username
                 </label>
-                <input
-                  type="text"
-                  value={displayUsername}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setDuplicateError("");
-                  }}
-                  onBlur={handleUsernameBlur}
-                  placeholder="@username"
-                  className={`w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2 text-sm font-medium ${duplicateError ? "ring-2 ring-destructive/50" : ""}`}
-                  style={{ backgroundColor: "var(--color-secondary)" }}
-                />
+                <div className="relative mt-1.5">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">@</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      setDuplicateError("");
+                    }}
+                    onBlur={handleUsernameBlur}
+                    placeholder="username"
+                    className={`w-full rounded-2xl border-0 pl-8 pr-4 h-12 focus:outline-none focus:ring-2 text-sm font-medium ${duplicateError ? "ring-2 ring-destructive/50" : ""}`}
+                    style={{ backgroundColor: "var(--color-secondary)" }}
+                  />
+                </div>
                 {duplicateError && (
                   <p className="text-xs text-destructive mt-1 font-medium">{duplicateError}</p>
                 )}
@@ -306,7 +309,7 @@ function ProfilePage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="cth. Raka Pratama"
-                  className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2"
+                  className="w-full mt-1.5 rounded-2xl border-0 px-4 h-12 focus:outline-none focus:ring-2 text-sm font-medium"
                   style={{ backgroundColor: "var(--color-secondary)" }}
                 />
               </div>

@@ -35,7 +35,10 @@ function Login() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return;
-    if (mode === "register" && (!email.trim() || !fullName.trim())) return;
+    if (mode === "register" && (!email.trim() || !fullName.trim())) {
+      setErrorMsg("Semua bidang (termasuk Nama Lengkap) wajib diisi untuk pendaftaran.");
+      return;
+    }
 
     setIsLoading(true);
     setErrorMsg("");
@@ -60,9 +63,14 @@ function Login() {
         });
         navigate({ to: "/" });
       } else {
-        await api.register(username, email, password, selectedRole);
+        await api.register(username, email, password, selectedRole, fullName);
         // No auto-login after register — show approval message
-        setErrorMsg("Akun berhasil dibuat. Silakan tunggu persetujuan Superadmin, lalu login.");
+        setErrorMsg("✨ Akun berhasil dibuat! Silakan hubungi Superadmin untuk aktivasi akun Anda.");
+        // Clear fields
+        setUsername("");
+        setPassword("");
+        setEmail("");
+        setFullName("");
       }
     } catch (err: any) {
       const msg = err.message || "Gagal menghubungi server. Pastikan Backend menyala.";
@@ -123,7 +131,7 @@ function Login() {
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Username
+              Username <span className="text-rose-500">*</span>
             </label>
             <input
               autoFocus
@@ -145,7 +153,7 @@ function Login() {
                 <div className="space-y-3">
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Nama Lengkap
+                      Nama Lengkap <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -159,7 +167,7 @@ function Login() {
 
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Peran
+                      Peran <span className="text-rose-500">*</span>
                     </label>
                     <div className="flex gap-2 mt-1.5">
                       <button
@@ -191,7 +199,7 @@ function Login() {
 
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Email
+                      Email <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="email"
@@ -209,7 +217,7 @@ function Login() {
 
           <div>
             <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Password
+              Password <span className="text-rose-500">*</span>
             </label>
             <input
               type="password"
@@ -225,7 +233,12 @@ function Login() {
             type="submit"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            disabled={!username.trim() || !password.trim() || isLoading}
+            disabled={
+              isLoading || 
+              !username.trim() || 
+              !password.trim() || 
+              (mode === "register" && (!email.trim() || !fullName.trim()))
+            }
             className="w-full h-12 mt-4 rounded-2xl font-semibold text-white shadow-glow flex justify-center items-center gap-2 disabled:opacity-50"
             style={{ backgroundColor: "var(--color-blush)" }}
           >

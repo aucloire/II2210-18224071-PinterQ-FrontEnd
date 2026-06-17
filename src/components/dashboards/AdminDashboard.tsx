@@ -222,6 +222,9 @@ export function AdminDashboard() {
                         }`}>
                           {u.role}
                         </Badge>
+                        {u.approvalStatus === "REJECTED" && (
+                          <Badge className="bg-rose-50 text-rose-500 text-[9px] font-bold border-0 h-4 px-1.5">REJECTED</Badge>
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">{u.email}</p>
                     </div>
@@ -258,13 +261,24 @@ export function AdminDashboard() {
                             <option value="SUPERADMIN">ADMIN</option>
                           </select>
                          
-                         {u.approvalStatus === "PENDING" && (
+                         {u.approvalStatus !== "APPROVED" && (
                             <Button
                               size="sm"
                               onClick={() => handleApprove(u.id)}
                               className="bg-sage hover:bg-sage/90 text-white font-bold text-xs h-9 px-4 rounded-lg"
                             >
                               Approve
+                            </Button>
+                         )}
+
+                         {u.approvalStatus === "APPROVED" && u.role !== "SUPERADMIN" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleReject(u.id)}
+                              className="text-destructive hover:bg-destructive/5 font-bold text-xs h-9 px-4 rounded-lg"
+                            >
+                              Reject
                             </Button>
                          )}
                       </div>

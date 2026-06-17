@@ -49,6 +49,16 @@ export const api = {
     return res.json();
   },
 
+  updateProfile: async (userId: number, updates: any) => {
+    const res = await fetch(`${BASE_URL}/auth/profile/${userId}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error("Gagal memperbarui profil");
+    return res.json();
+  },
+
   // === CLASSES ===
   getTeacherClasses: async (teacherId: number) => {
     const res = await fetch(`${BASE_URL}/classes/my/${teacherId}`, {
@@ -117,11 +127,11 @@ export const api = {
   },
 
   // === AI GENERATION ===
-  generateStudyMaterial: async (userId: number, categoryId: number, title: string, content: string, id?: number) => {
+  generateStudyMaterial: async (userId: number, categoryId: number, title: string, content: string, materialId?: number) => {
     const res = await fetch(`${BASE_URL}/study/generate`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ userId, categoryId, title, content, id }),
+      body: JSON.stringify({ userId, categoryId, title, content, materialId }),
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
