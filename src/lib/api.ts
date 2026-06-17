@@ -75,11 +75,11 @@ export const api = {
     return res.json();
   },
 
-  createClass: async (data: any) => {
+  createClass: async (name: string, teacherId: number) => {
     const res = await fetch(`${BASE_URL}/classes`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify(data),
+      body: JSON.stringify({ name, teacherId }),
     });
     if (!res.ok) throw new Error("Gagal membuat kelas");
     return res.json();
@@ -106,7 +106,24 @@ export const api = {
     return res.json();
   },
 
+  deleteClass: async (classId: number) => {
+    const res = await fetch(`${BASE_URL}/classes/${classId}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal menghapus kelas");
+    return res.text();
+  },
+
   // === CATEGORIES (SUBJECTS) ===
+  getPublicCategories: async () => {
+    const res = await fetch(`${BASE_URL}/categories/public`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Gagal mengambil kategori publik");
+    return res.json();
+  },
+
   getCategories: async (userId: number) => {
     const res = await fetch(`${BASE_URL}/categories/user/${userId}`, {
       headers: authHeaders(),
@@ -123,6 +140,11 @@ export const api = {
     });
     if (!res.ok) throw new Error("Gagal membuat kategori baru");
     return res.json();
+  },
+
+  checkUsernameAvailability: async (username: string) => {
+    // This is a placeholder for future implementation
+    return { available: true };
   },
 
   // === AI GENERATION ===

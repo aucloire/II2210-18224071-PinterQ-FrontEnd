@@ -79,16 +79,16 @@ function CategoryDetailPage() {
       });
 
       (Array.isArray(quizzesData) ? quizzesData : []).forEach((q: any) => {
-        const mId = q.material?.id;
+        const mId = q.materialId;
         if (!mId) return;
-        if (!groups[mId]) groups[mId] = { id: mId, title: q.material.title, quizzes: [], flashcards: [] };
+        if (!groups[mId]) groups[mId] = { id: mId, title: "Materi Tanpa Judul", quizzes: [], flashcards: [] };
         groups[mId].quizzes.push(q);
       });
 
       (Array.isArray(flashcardsData) ? flashcardsData : []).forEach((f: any) => {
-        const mId = f.material?.id;
+        const mId = f.materialId;
         if (!mId) return;
-        if (!groups[mId]) groups[mId] = { id: mId, title: f.material.title, quizzes: [], flashcards: [] };
+        if (!groups[mId]) groups[mId] = { id: mId, title: "Materi Tanpa Judul", quizzes: [], flashcards: [] };
         groups[mId].flashcards.push(f);
       });
 

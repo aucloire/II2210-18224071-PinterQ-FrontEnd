@@ -55,9 +55,8 @@ function ExplorePage() {
           options: [q.optionA, q.optionB, q.optionC, q.optionD],
           correctIndex: ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer),
           explanation: q.explanation,
-          materialId: q.material?.id
-        }));
-        setQuiz(mappedQuizzes);
+          materialId: q.materialId
+        }));        setQuiz(mappedQuizzes);
       }).finally(() => {
         setIsLoadingData(false);
       });
